@@ -2,7 +2,7 @@
 
 A local MCP server, CLI and dashboard for persistent project teams. Each goal snapshots an editable roster and gives each participating agent an independent durable Codex app-server thread. The goal chooses its lead. Direct messages, owned tasks/dependencies, captured evidence and lead verification coordinate work; idle roster members use no model turns.
 
-**Release status:** portable Linux package/CLI/MCP/dashboard and mocked security tests are verified. Real multi-agent model acceptance and actual Mac installation/LaunchAgent/login/restart remain **PENDING**. Cloud task authentication is not consumer authentication and was not used for model turns. The [source repository](https://github.com/VictorWong123/codex-teams) is public. The npm registry package has not been published. See `VALIDATION.md` in the source repository for release evidence.
+**Release status:** portable Linux package/CLI/MCP/dashboard and mocked security tests are verified. Actual Mac installation, both CLI aliases, Codex MCP registration, consumer ChatGPT authentication reuse and owned LaunchAgent stop/stays-down/start passed on v0.1.0. Real multi-agent model acceptance remains **PENDING**; its first7-second attempt consumed0 turns and correctly blocked inherited app/plugin tools before dispatch. The v0.1.1 hotfix is awaiting the consumer rerun. Cloud task authentication is not consumer authentication and was not used for model turns. The [source repository](https://github.com/VictorWong123/codex-teams) is public. The npm registry package has not been published. See `VALIDATION.md` in the source repository for release evidence.
 
 The primary command is **`cteam`**. **`codex-teams`** remains a compatible alias. The package/repository, MCP entry/tool names, configuration and environment variables retain their existing Codex Teams names.
 
@@ -13,7 +13,7 @@ Requires Node **22.22.0 or later**, npm and **Codex CLI exactly 0.163.0**. Node'
 Install the public versioned release (the tag verification is recorded in the release chat):
 
 ```sh
-npm install -g 'git+https://github.com/VictorWong123/codex-teams.git#v0.1.0'
+npm install -g 'git+https://github.com/VictorWong123/codex-teams.git#v0.1.1'
 codex --version                 # codex-cli 0.163.0
 codex login                     # your own supported ChatGPT login
 cteam install             # backs up Codex config; adds one MCP + usage skill
@@ -24,7 +24,7 @@ cteam dashboard
 
 Credential-free public retrieval and installed CLI/MCP/dashboard checks passed for baseline `264b4c137374aca9d7c71017a7cd841a8f459853` using the explicit HTTPS source URL; the versioned release also includes the owned LaunchAgent stop/start fix. See `VALIDATION.md` for the exact baseline command and test boundaries.
 
-Alternatively install the release tarball with `npm install -g /path/to/codex-teams-0.1.0.tgz`. From a checkout: `npm ci && npm pack`, then globally install that tarball. The npm registry package name is not claimed as published. Restart Codex after adding the MCP entry/skill. Existing settings and unrelated MCP entries are preserved; either conflicting CLI alias (`cteam` or `codex-teams`) or an unrelated MCP entry named `codex-teams` cause installation to refuse before modifying configuration.
+Alternatively install the release tarball with `npm install -g /path/to/codex-teams-0.1.1.tgz`. From a checkout: `npm ci && npm pack`, then globally install that tarball. The npm registry package name is not claimed as published. Restart Codex after adding the MCP entry/skill. Existing settings and unrelated MCP entries are preserved; either conflicting CLI alias (`cteam` or `codex-teams`) or an unrelated MCP entry named `codex-teams` cause installation to refuse before modifying configuration. Supported Codex registration is validated in a private staging config; only the owned MCP table is merged into the original text, preserving unrelated empty arrays/comments. Concurrent config edits detected before commit cause a safe retry.
 
 For macOS background startup, after the portable steps run:
 
@@ -34,9 +34,9 @@ cteam install --launchagent
 cteam service status
 ```
 
-This installs one `~/Library/LaunchAgents/com.codex-teams.service.plist` with absolute Node, script and Codex executable paths. The user LaunchAgent starts at login and keeps the service alive while the Mac is awake. `cteam service stop` bootouts only the owned job so KeepAlive cannot immediately restart it; the plist stays installed. `cteam service start` bootstraps the owned plist when unloaded or kickstarts the owned loaded job without forcing an active service restart. A separately detached instance is shut down before bootstrap to avoid a port conflict. Ownership checks cover a canonical regular plist, the marker, exact label, expected Node runtime/service script and loaded plist path, and reject executable overrides; changed integration paths require reinstalling. Closing the dashboard/chat does not stop work. Sleep/shutdown stops local execution; no Cloud hosting or wake guarantee is implied. Changing Node/package installation paths requires reinstalling the LaunchAgent. Actual `launchctl` operation must be checked on your Mac; Linux verification cannot establish it.
+This installs one `~/Library/LaunchAgents/com.codex-teams.service.plist` with absolute Node, script and Codex executable paths. The user LaunchAgent starts at login and keeps the service alive while the Mac is awake. `cteam service stop` bootouts only the owned job so KeepAlive cannot immediately restart it; the plist stays installed. `cteam service start` bootstraps the owned plist when unloaded or kickstarts the owned loaded job without forcing an active service restart. A separately detached instance is shut down before bootstrap to avoid a port conflict. Ownership checks cover a canonical regular plist, the marker, exact label, expected Node runtime/service script and loaded plist path, and reject executable overrides; changed integration paths require reinstalling. Closing the dashboard/chat does not stop work. Sleep/shutdown stops local execution; no Cloud hosting or wake guarantee is implied. Changing Node/package installation paths requires reinstalling the LaunchAgent. Real `launchctl` stop/start behavior passed on the consumer Mac for v0.1.0; each new installation should still verify its own startup. Linux checks alone cannot establish it.
 
-On the Mac, these are the reversible manual equivalents for the owned integration (actual macOS verification remains pending):
+On the Mac, these are the reversible manual equivalents for the owned integration (real consumer Mac controls passed on v0.1.0):
 
 ```sh
 launchctl bootout "gui/$(id -u)/com.codex-teams.service"

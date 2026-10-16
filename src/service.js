@@ -20,7 +20,7 @@ export async function createService({port=SERVICE_PORT,registry=new Registry(),a
   const origin=req.headers.origin;if(origin&&![`http://127.0.0.1:${port}`,`http://localhost:${port}`].includes(origin))throw failure(403,'Invalid Origin');
   if(req.headers['sec-fetch-site']==='cross-site')throw failure(403,'Cross-site request rejected');
   const url=new URL(req.url,`http://127.0.0.1:${port}`);
-  if(req.method==='GET'&&url.pathname==='/health')return send(res,200,{ok:true,version:'0.1.0',codexConnected:orchestrator.ready});
+  if(req.method==='GET'&&url.pathname==='/health')return send(res,200,{ok:true,version:'0.1.1',codexConnected:orchestrator.ready});
   if(!url.pathname.startsWith('/api/')){if(req.method!=='GET')throw failure(405,'GET required');return staticFile(url.pathname,res);}
   if(req.headers['x-codex-teams-request']!=='1')throw failure(403,'CSRF header required');
   const bearer=(req.headers.authorization||'').replace(/^Bearer /,'');let scoped=null;
