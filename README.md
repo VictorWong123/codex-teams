@@ -2,9 +2,7 @@
 
 A local MCP server, CLI and dashboard for persistent project teams. Each goal snapshots an editable roster and gives each participating agent an independent durable Codex app-server thread. The goal chooses its lead. Direct messages, owned tasks/dependencies, captured evidence and lead verification coordinate work; idle roster members use no model turns.
 
-**Release status:** v0.1.2 passed the real consumer Mac slugify acceptance using the consumer's own Codex-managed ChatGPT login: 5 model turns in 229.761 seconds, direct researcher→developer delivery, verified research/implementation tasks, captured test evidence, independent assertions and 31 passing Node fixture tests. Cloud separately passed 43 portable/security regressions and consumed no model turns. Actual Mac installation, both aliases, MCP registration, unrelated config preservation, owned LaunchAgent stop/start and uninstall/reinstall with data preservation passed. The completed goal retains a lead-turn `recovery_review` marker from shutdown cleanup; see `VALIDATION.md` for this limit and the unreported sleep/wake behavior. The [source repository](https://github.com/VictorWong123/codex-teams) is public; the npm registry package is not published.
-
-**QA candidate:** the `qa/installed-functionality` branch contains candidate v0.1.3 fixes for project context, participant snapshot identities, retry responses, recovery races and dashboard forms. It is awaiting the consumer installed-host QA checkpoint; the accepted installation below remains v0.1.2. See [validation](VALIDATION.md#v013-installed-functionality-qa-candidate).
+**Release status:** v0.1.3 passed installed Mac QA and the consumer-owned ChatGPT slugify workflow: 4 model turns in 156.17 seconds, direct researcher→developer delivery, verified tasks and captured/independent test evidence. Cloud passed 50 portable/security regressions with no model turns. Across all acceptance attempts, 10 turns /403.666 seconds stayed within the original12-turn/15-minute budget. The final terminal-cleanup recovery follow-up passed portable checks; its separate Mac check remains unreported. See [validation](VALIDATION.md#v013-installed-functionality-qa--passed) for exact revisions and limits, including unreported sleep/wake behavior. The [source repository](https://github.com/VictorWong123/codex-teams) is public; the npm registry package is not published.
 
 The primary command is **`cteam`**. **`codex-teams`** remains a compatible alias. The package/repository, MCP entry/tool names, configuration and environment variables retain their existing Codex Teams names.
 
@@ -15,7 +13,7 @@ Requires Node **22.22.0 or later**, npm and **Codex CLI exactly 0.163.0**. Node'
 Install the public, acceptance-tested release through its immutable HTTPS tag archive (avoids local Git SSH URL rewrites):
 
 ```sh
-npm install -g https://github.com/VictorWong123/codex-teams/archive/refs/tags/v0.1.2.tar.gz
+npm install -g https://github.com/VictorWong123/codex-teams/archive/refs/tags/v0.1.3.tar.gz
 codex --version                 # codex-cli 0.163.0
 codex login                     # your own supported ChatGPT login
 cteam install             # backs up Codex config; adds one MCP + usage skill
@@ -24,9 +22,9 @@ cteam init /absolute/path/to/project
 cteam dashboard
 ```
 
-Credential-free public HTTPS installation, clean-prefix CLI/MCP/dashboard checks and package audits passed. The accepted implementation is `4f15f5ca2512d1938824b00f55a2a76c7e9219b4` (v0.1.2); existing version tags remain unchanged. See `VALIDATION.md` for artifact/checksum and test boundaries.
+Credential-free public HTTPS installation, clean-prefix CLI/MCP/dashboard checks and package audits passed. Live Mac acceptance exercised `f596621f41966717e53aac558d4acd044c261e3d`; terminal recovery follow-up `85c6fc4480368f8431001dd432a54461becc54b1` additionally passed the full portable suite and fresh public-archive installation. Existing release tags remain unchanged. See `VALIDATION.md` for artifact/checksum and test boundaries.
 
-Alternatively install the release tarball with `npm install -g /path/to/codex-teams-0.1.2.tgz`. From a checkout: `npm ci && npm pack`, then globally install that tarball. The npm registry package name is not claimed as published. Restart Codex after adding the MCP entry/skill. Existing settings and unrelated MCP entries are preserved; either conflicting CLI alias (`cteam` or `codex-teams`) or an unrelated MCP entry named `codex-teams` cause installation to refuse before modifying configuration. Supported Codex registration is validated in a private staging config; only the owned MCP table is merged into the original text, preserving unrelated empty arrays/comments. Concurrent config edits detected before commit cause a safe retry.
+Alternatively install the release tarball with `npm install -g /path/to/codex-teams-0.1.3.tgz`. From a checkout: `npm ci && npm pack`, then globally install that tarball. The npm registry package name is not claimed as published. Restart Codex after adding the MCP entry/skill. Existing settings and unrelated MCP entries are preserved; either conflicting CLI alias (`cteam` or `codex-teams`) or an unrelated MCP entry named `codex-teams` cause installation to refuse before modifying configuration. Supported Codex registration is validated in a private staging config; only the owned MCP table is merged into the original text, preserving unrelated empty arrays/comments. Concurrent config edits detected before commit cause a safe retry.
 
 For macOS background startup, after the portable steps run:
 
@@ -36,9 +34,9 @@ cteam install --launchagent
 cteam service status
 ```
 
-This installs one `~/Library/LaunchAgents/com.codex-teams.service.plist` with absolute Node, script and Codex executable paths. The user LaunchAgent starts at login and keeps the service alive while the Mac is awake. `cteam service stop` bootouts only the owned job so KeepAlive cannot immediately restart it; the plist stays installed. `cteam service start` bootstraps the owned plist when unloaded or kickstarts the owned loaded job without forcing an active service restart. A separately detached instance is shut down before bootstrap to avoid a port conflict. Ownership checks cover a canonical regular plist, the marker, exact label, expected Node runtime/service script and loaded plist path, and reject executable overrides; changed integration paths require reinstalling. Closing the dashboard/chat does not stop work. Sleep/shutdown stops local execution; no Cloud hosting or wake guarantee is implied. Changing Node/package installation paths requires reinstalling the LaunchAgent. Real `launchctl` stop/start behavior passed on the consumer Mac for v0.1.2; each new installation should still verify its own startup. Linux checks alone cannot establish it.
+This installs one `~/Library/LaunchAgents/com.codex-teams.service.plist` with absolute Node, script and Codex executable paths. The user LaunchAgent starts at login and keeps the service alive while the Mac is awake. `cteam service stop` bootouts only the owned job so KeepAlive cannot immediately restart it; the plist stays installed. `cteam service start` bootstraps the owned plist when unloaded or kickstarts the owned loaded job without forcing an active service restart. A separately detached instance is shut down before bootstrap to avoid a port conflict. Ownership checks cover a canonical regular plist, the marker, exact label, expected Node runtime/service script and loaded plist path, and reject executable overrides; changed integration paths require reinstalling. Closing the dashboard/chat does not stop work. Sleep/shutdown stops local execution; no Cloud hosting or wake guarantee is implied. Changing Node/package installation paths requires reinstalling the LaunchAgent. Real `launchctl` stop/start behavior passed on the consumer Mac for v0.1.3; each new installation should still verify its own startup. Linux checks alone cannot establish it.
 
-On the Mac, these are the reversible manual equivalents for the owned integration (real consumer Mac controls passed on v0.1.2):
+On the Mac, these are the reversible manual equivalents for the owned integration (real consumer Mac controls passed on v0.1.3):
 
 ```sh
 launchctl bootout "gui/$(id -u)/com.codex-teams.service"
@@ -123,7 +121,7 @@ cteam self-test             # isolated auth-blocked transport/version probe; zer
 cteam self-test --live      # your own logged-in machine ONLY; <=12 turns /15 wall minutes
 ```
 
-The live command creates a disposable dependency-free Git project, submits the slugify goal through the CLI/service path, requires researcher→developer messaging, implementation/tests, captured evidence and lead verification, then independently checks the output. It writes a bounded report and preserves the disposable project for inspection. It refuses platform-managed Cloud authentication. A pending/blocked result is reported honestly; no API-key fallback is offered. Cloud used no model turns. The completed consumer acceptance used **6 aggregate model turns /247.496 seconds**, including the earlier failed 1-turn attempt and successful 5-turn rerun, within the shared 12-turn/15-minute budget. No further acceptance turns are needed. An internal harness can request a strictly smaller allowance; no CLI budget-widening flags are exposed.
+The live command creates a disposable dependency-free Git project, submits the slugify goal through the CLI/service path, requires researcher→developer messaging, implementation/tests, captured evidence and lead verification, then independently checks the output. It writes a bounded report and preserves the disposable project for inspection. It refuses platform-managed Cloud authentication. A pending/blocked result is reported honestly; no API-key fallback is offered. Cloud used no model turns. Consumer acceptance across all attempts used **10 aggregate model turns /403.666 seconds**, including the earlier failed1-turn attempt, successful5-turn v0.1.2 rerun and successful4-turn v0.1.3 QA, within the shared12-turn/15-minute budget. No further acceptance turns are needed. An internal harness can request a strictly smaller allowance; no CLI budget-widening flags are exposed.
 
 ```sh
 cteam service stop
