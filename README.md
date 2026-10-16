@@ -2,37 +2,49 @@
 
 A local MCP server, CLI and dashboard for persistent project teams. Each goal snapshots an editable roster and gives each participating agent an independent durable Codex app-server thread. The goal chooses its lead. Direct messages, owned tasks/dependencies, captured evidence and lead verification coordinate work; idle roster members use no model turns.
 
-**Release status:** portable Linux package/CLI/MCP/dashboard and mocked security tests are verified. Real multi-agent model acceptance and actual Mac installation/LaunchAgent/login/restart remain **PENDING**. Cloud task authentication is not consumer authentication and was not used for model turns. Source visibility and npm registry publication are separate release actions; this package does not assume registry publication. See `VALIDATION.md` in the source repository for release evidence.
+**Release status:** portable Linux package/CLI/MCP/dashboard and mocked security tests are verified. Real multi-agent model acceptance and actual Mac installation/LaunchAgent/login/restart remain **PENDING**. Cloud task authentication is not consumer authentication and was not used for model turns. The [source repository](https://github.com/VictorWong123/codex-teams) is public. The npm registry package has not been published. See `VALIDATION.md` in the source repository for release evidence.
+
+The primary command is **`cteam`**. **`codex-teams`** remains a compatible alias. The package/repository, MCP entry/tool names, configuration and environment variables retain their existing Codex Teams names.
 
 ## Install
 
 Requires Node **22.22.0 or later**, npm and **Codex CLI exactly 0.163.0**. Node's built-in SQLite may display an experimental warning on Node 22. Existing Codex-managed **ChatGPT login** is required only for model work. There is no API-key/provider fallback, shared account, token copying or credit purchase.
 
-After the repository becomes public:
+Install the public versioned release (the tag verification is recorded in the release chat):
 
 ```sh
-npm install -g github:VictorWong123/codex-teams
+npm install -g 'git+https://github.com/VictorWong123/codex-teams.git#v0.1.0'
 codex --version                 # codex-cli 0.163.0
 codex login                     # your own supported ChatGPT login
-codex-teams install             # backs up Codex config; adds one MCP + usage skill
-codex-teams service start
-codex-teams init /absolute/path/to/project
-codex-teams dashboard
+cteam install             # backs up Codex config; adds one MCP + usage skill
+cteam service start
+cteam init /absolute/path/to/project
+cteam dashboard
 ```
 
-Alternatively install the release tarball with `npm install -g /path/to/codex-teams-0.1.0.tgz`. From a checkout: `npm ci && npm pack`, then globally install that tarball. The npm registry package name is not claimed as published. Restart Codex after adding the MCP entry/skill. Existing settings and unrelated MCP entries are preserved; conflicting owned paths or an unrelated entry named `codex-teams` cause installation to refuse before modifying configuration.
+Credential-free public retrieval and installed CLI/MCP/dashboard checks passed for baseline `264b4c137374aca9d7c71017a7cd841a8f459853` using the explicit HTTPS source URL; the versioned release also includes the owned LaunchAgent stop/start fix. See `VALIDATION.md` for the exact baseline command and test boundaries.
+
+Alternatively install the release tarball with `npm install -g /path/to/codex-teams-0.1.0.tgz`. From a checkout: `npm ci && npm pack`, then globally install that tarball. The npm registry package name is not claimed as published. Restart Codex after adding the MCP entry/skill. Existing settings and unrelated MCP entries are preserved; either conflicting CLI alias (`cteam` or `codex-teams`) or an unrelated MCP entry named `codex-teams` cause installation to refuse before modifying configuration.
 
 For macOS background startup, after the portable steps run:
 
 ```sh
-codex-teams service stop
-codex-teams install --launchagent
-codex-teams service status
+cteam service stop
+cteam install --launchagent
+cteam service status
 ```
 
-This installs one `~/Library/LaunchAgents/com.codex-teams.service.plist` with absolute Node, script and Codex executable paths. The user LaunchAgent starts at login and keeps the service alive while the Mac is awake. Closing the dashboard/chat does not stop work. Sleep/shutdown stops local execution; no Cloud hosting or wake guarantee is implied. Changing Node/package installation paths requires reinstalling the LaunchAgent. Actual `launchctl` operation must be checked on your Mac; Linux verification cannot establish it.
+This installs one `~/Library/LaunchAgents/com.codex-teams.service.plist` with absolute Node, script and Codex executable paths. The user LaunchAgent starts at login and keeps the service alive while the Mac is awake. `cteam service stop` bootouts only the owned job so KeepAlive cannot immediately restart it; the plist stays installed. `cteam service start` bootstraps the owned plist when unloaded or kickstarts the owned loaded job without forcing an active service restart. A separately detached instance is shut down before bootstrap to avoid a port conflict. Ownership checks cover a canonical regular plist, the marker, exact label, expected Node runtime/service script and loaded plist path, and reject executable overrides; changed integration paths require reinstalling. Closing the dashboard/chat does not stop work. Sleep/shutdown stops local execution; no Cloud hosting or wake guarantee is implied. Changing Node/package installation paths requires reinstalling the LaunchAgent. Actual `launchctl` operation must be checked on your Mac; Linux verification cannot establish it.
 
-Linux supports the tested detached service and foreground `codex-teams service start --foreground`. There is no Linux boot integration. Windows installation/service behavior has not been validated and is unsupported for this release. The dashboard binds **127.0.0.1 only**. `dashboard` opens a credential URL fragment locally; treat the printed URL as private. It is removed from the address bar and kept in tab session storage; **Lock** clears it. Do not forward the port or expose it publicly.
+On the Mac, these are the reversible manual equivalents for the owned integration (actual macOS verification remains pending):
+
+```sh
+launchctl bootout "gui/$(id -u)/com.codex-teams.service"
+launchctl bootstrap "gui/$(id -u)" "$HOME/Library/LaunchAgents/com.codex-teams.service.plist"
+launchctl kickstart "gui/$(id -u)/com.codex-teams.service"
+```
+
+Linux supports the tested detached service and foreground `cteam service start --foreground`. There is no Linux boot integration. Windows installation/service behavior has not been validated and is unsupported for this release. The dashboard binds **127.0.0.1 only**. `dashboard` opens a credential URL fragment locally; treat the printed URL as private. It is removed from the address bar and kept in tab session storage; **Lock** clears it. Do not forward the port or expose it publicly.
 
 ## Use
 
@@ -40,35 +52,35 @@ Ordinary Codex requests never start teams automatically. Ask explicitly for team
 
 ```sh
 cd /path/to/project
-codex-teams roster list
-codex-teams roster add editor --json '{"purpose":"Review clarity","instructions":"Inspect and message findings","permission":"read-only","model":"gpt-6.1-sol"}'
-codex-teams roster edit editor --json '{"name":"clarity reviewer","instructions":"Check acceptance criteria"}'
-codex-teams roster model 'clarity reviewer' --model gpt-6.1-sol
-codex-teams roster model 'clarity reviewer' --model inherit
-codex-teams roster disable 'clarity reviewer'
-codex-teams roster remove 'clarity reviewer'
-codex-teams config get
-codex-teams config set --file /path/to/team.json
-codex-teams goal 'Implement the feature and test its edge cases' --lead developer --participants developer,researcher
-codex-teams status
-codex-teams message researcher --goal GOAL_ID --body 'Investigate the parser; send findings directly to developer'
-codex-teams message developer --body 'A standalone assignment with its own fresh goal'
-codex-teams message developer --goal GOAL_ID --body 'FYI: preserve compatibility' --informational
-codex-teams tasks list
-codex-teams tasks create --goal GOAL_ID --json '{"title":"Investigate","owner":"researcher","criteria":"Concrete source findings","evidenceType":"research"}'
-codex-teams notes add --json '{"goalId":"GOAL_ID","title":"Decision","body":"Reusable project knowledge"}'
-codex-teams conversations --search parser
-codex-teams conversations --sync --search parser
-codex-teams participant editor --goal GOAL_ID
-codex-teams reopen GOAL_ID --prompt 'Continue from the original conversation and inspect current state'
-codex-teams interrupt --goal GOAL_ID --agent developer
-codex-teams pause --goal GOAL_ID
-codex-teams resume --goal GOAL_ID
-codex-teams stop --goal GOAL_ID
-codex-teams pause                 # all work in this project
-codex-teams resume
-codex-teams approvals
-codex-teams approvals resolve APPROVAL_ID --json '{"decision":"decline"}'
+cteam roster list
+cteam roster add editor --json '{"purpose":"Review clarity","instructions":"Inspect and message findings","permission":"read-only","model":"gpt-6.1-sol"}'
+cteam roster edit editor --json '{"name":"clarity reviewer","instructions":"Check acceptance criteria"}'
+cteam roster model 'clarity reviewer' --model gpt-6.1-sol
+cteam roster model 'clarity reviewer' --model inherit
+cteam roster disable 'clarity reviewer'
+cteam roster remove 'clarity reviewer'
+cteam config get
+cteam config set --file /path/to/team.json
+cteam goal 'Implement the feature and test its edge cases' --lead developer --participants developer,researcher
+cteam status
+cteam message researcher --goal GOAL_ID --body 'Investigate the parser; send findings directly to developer'
+cteam message developer --body 'A standalone assignment with its own fresh goal'
+cteam message developer --goal GOAL_ID --body 'FYI: preserve compatibility' --informational
+cteam tasks list
+cteam tasks create --goal GOAL_ID --json '{"title":"Investigate","owner":"researcher","criteria":"Concrete source findings","evidenceType":"research"}'
+cteam notes add --json '{"goalId":"GOAL_ID","title":"Decision","body":"Reusable project knowledge"}'
+cteam conversations --search parser
+cteam conversations --sync --search parser
+cteam participant editor --goal GOAL_ID
+cteam reopen GOAL_ID --prompt 'Continue from the original conversation and inspect current state'
+cteam interrupt --goal GOAL_ID --agent developer
+cteam pause --goal GOAL_ID
+cteam resume --goal GOAL_ID
+cteam stop --goal GOAL_ID
+cteam pause                 # all work in this project
+cteam resume
+cteam approvals
+cteam approvals resolve APPROVAL_ID --json '{"decision":"decline"}'
 ```
 
 The dashboard supports the same roster/configuration/specification edits, participants/lead selection, goals, messages, conversations, tasks/dependencies, evidence, notes, limits/usage, activity, interruption, goal/project controls and human approval responses. The dashboard can create tasks, request corrections and verify captured evidence as the goal lead, and displays criteria, dependencies and ownership. Save reusable goals in canonical JSON `specifications: [{"name":"…","prompt":"…","criteria":"…"}]`.
@@ -92,12 +104,12 @@ Approvals are human-only and method-aware. Command/file responses use `{"decisio
 Restart marks running/dispatching/starting ambiguities as **recovery_review** and blocks scheduling. No ambiguous side effect, dispatching message or claimed task is blindly repeated. To reconcile:
 
 ```sh
-codex-teams recovery inspect --goal GOAL_ID
+cteam recovery inspect --goal GOAL_ID
 # Inspect authoritative paginated Codex history, files, Git diff, task state and effects.
-codex-teams recovery acknowledge --goal GOAL_ID --acknowledge-side-effects
+cteam recovery acknowledge --goal GOAL_ID --acknowledge-side-effects
 # Create an explicit fresh message or revise a task after inspecting effects:
-codex-teams tasks revise TASK_ID --json '{"instructions":"Continue only the remaining work"}'
-codex-teams resume --goal GOAL_ID
+cteam tasks revise TASK_ID --json '{"instructions":"Continue only the remaining work"}'
+cteam resume --goal GOAL_ID
 ```
 
 Acknowledgement never retries held ambiguous deliveries/tasks. Known pre-dispatch cancellations restore only their exact queued message/task. Reopening completed goals reuses their original threads; new goals create fresh threads and receive saved notes with origin-goal references, not entire old transcripts. Conversation search uses persisted authoritative item/turn events; `--sync` explicitly hydrates paginated Codex history after login.
@@ -105,18 +117,18 @@ Acknowledgement never retries held ambiguous deliveries/tasks. Known pre-dispatc
 ## Self-test and uninstall
 
 ```sh
-codex-teams self-test             # isolated auth-blocked transport/version probe; zero model turns
-codex-teams self-test --live      # your own logged-in machine ONLY; <=12 turns /15 wall minutes
+cteam self-test             # isolated auth-blocked transport/version probe; zero model turns
+cteam self-test --live      # your own logged-in machine ONLY; <=12 turns /15 wall minutes
 ```
 
 The live command creates a disposable dependency-free Git project, submits the slugify goal through the CLI/service path, requires researcher→developer messaging, implementation/tests, captured evidence and lead verification, then independently checks the output. It writes a bounded report and preserves the disposable project for inspection. It refuses platform-managed Cloud authentication. A pending/blocked result is reported honestly; no API-key fallback is offered. The shared initial real-acceptance budget remains unused in this Cloud release (**0 turns**); coordinate later attempts against the same total budget.
 
 ```sh
-codex-teams service stop
-codex-teams uninstall
+cteam service stop
+cteam uninstall
 npm uninstall -g codex-teams
 ```
 
-With LaunchAgent KeepAlive enabled, `service stop` alone restarts it; uninstall bootouts/removes only the owned LaunchAgent, CLI symlink, usage skill and matching MCP entry. Codex configuration is backed up before MCP edits. All project JSON, state databases, histories, notes, credentials and Git worktrees are preserved. Restart Codex to remove cached tools. No automatic purge exists. Optional state location override: `CODEX_TEAMS_DATA`; port override: `CODEX_TEAMS_PORT`; executable override: `CODEX_BIN`. Use consistent overrides when installing/starting/calling clients. Default state is `~/Library/Application Support/codex-teams` on macOS and `$XDG_STATE_HOME/codex-teams` or `~/.local/state/codex-teams` on Linux.
+`service stop` unloads the owned LaunchAgent and also shuts down any separately detached service. `service start` reverses that stop without rewriting configuration. Uninstall bootouts/removes only the owned LaunchAgent, both matching CLI symlinks, usage skill and matching MCP entry. Codex configuration is backed up before MCP edits. All project JSON, state databases, histories, notes, credentials and Git worktrees are preserved. Restart Codex to remove cached tools. No automatic purge exists. Optional state location override: `CODEX_TEAMS_DATA`; port override: `CODEX_TEAMS_PORT`; executable override: `CODEX_BIN`. Use consistent overrides when installing/starting/calling clients. Default state is `~/Library/Application Support/codex-teams` on macOS and `$XDG_STATE_HOME/codex-teams` or `~/.local/state/codex-teams` on Linux.
 
 For source checks: `npm ci`, `npm run check`, `npm test`, `npm audit`, `npm pack --dry-run`. See `SECURITY.md` and `PROTOCOL.md`.

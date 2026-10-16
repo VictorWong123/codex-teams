@@ -18,7 +18,7 @@ export function resolveProject(start, override) {
   while (true) {
     try { return { root: current, config: readJson(join(current, ".codex-teams", "team.json")) }; } catch (e) { if(e.code!=="ENOENT")throw new Error(`Invalid team configuration at ${join(current,".codex-teams","team.json")}: ${e.message}`); }
     const parent = dirname(current);
-    if (parent === current) throw new Error("No .codex-teams/team.json found; run codex-teams init in the project");
+    if (parent === current) throw new Error("No .codex-teams/team.json found; run cteam init in the project");
     current = parent;
   }
 }

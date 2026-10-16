@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "type": "module",
   "bin": {
+    "cteam": "src/cli.js",
     "codex-teams": "src/cli.js",
     "codex-teams-mcp": "src/mcp.js"
   },
