@@ -1,0 +1,19 @@
+{
+  "name": "codex-teams",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": { "codex-teams": "src/cli.js", "codex-teams-mcp": "src/mcp.js" },
+  "scripts": {
+    "start": "node src/service.js",
+    "test": "node --test",
+    "check": "node --check src/service.js && node --check src/cli.js && node --check src/mcp.js",
+    "install:user": "bash scripts/install.sh",
+    "uninstall:user": "bash scripts/uninstall.sh"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.21.1",
+    "zod": "3.25.76"
+  },
+  "engines": { "node": ">=22.5" }
+}
