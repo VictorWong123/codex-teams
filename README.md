@@ -4,6 +4,8 @@ A local MCP server, CLI and dashboard for persistent project teams. Each goal sn
 
 **Release status:** v0.1.2 passed the real consumer Mac slugify acceptance using the consumer's own Codex-managed ChatGPT login: 5 model turns in 229.761 seconds, direct researcher→developer delivery, verified research/implementation tasks, captured test evidence, independent assertions and 31 passing Node fixture tests. Cloud separately passed 43 portable/security regressions and consumed no model turns. Actual Mac installation, both aliases, MCP registration, unrelated config preservation, owned LaunchAgent stop/start and uninstall/reinstall with data preservation passed. The completed goal retains a lead-turn `recovery_review` marker from shutdown cleanup; see `VALIDATION.md` for this limit and the unreported sleep/wake behavior. The [source repository](https://github.com/VictorWong123/codex-teams) is public; the npm registry package is not published.
 
+**QA candidate:** the `qa/installed-functionality` branch contains candidate v0.1.3 fixes for project context, participant snapshot identities, retry responses, recovery races and dashboard forms. It is awaiting the consumer installed-host QA checkpoint; the accepted installation below remains v0.1.2. See [validation](VALIDATION.md#v013-installed-functionality-qa-candidate).
+
 The primary command is **`cteam`**. **`codex-teams`** remains a compatible alias. The package/repository, MCP entry/tool names, configuration and environment variables retain their existing Codex Teams names.
 
 ## Install

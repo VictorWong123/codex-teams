@@ -12,7 +12,7 @@ export function projectId(path) { return createHash("sha256").update(realpathSyn
 export function token() { return randomBytes(32).toString("hex"); }
 export function readJson(path) { return JSON.parse(readFileSync(path, "utf8")); }
 export function resolveProject(start, override) {
-  let current = resolve(override || start || process.cwd());
+  let current = override ? resolve(start || process.cwd(), override) : resolve(start || process.cwd());
   if (!statSync(current).isDirectory()) current = dirname(current);
   try{const reg=readJson(join(DATA_DIR,'registry.json'));const alias=reg.projects.find(p=>(p.aliases||[]).some(a=>current===a||current.startsWith(a+'/')));if(alias)return {root:alias.root,config:readJson(join(alias.root,'.codex-teams','team.json'))};}catch{}
   while (true) {
@@ -22,3 +22,5 @@ export function resolveProject(start, override) {
     current = parent;
   }
 }
+
+export function idSegment(value){if(typeof value!=='string'||!/^([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i.test(value))throw new Error('Expected a UUID identifier');return encodeURIComponent(value);}

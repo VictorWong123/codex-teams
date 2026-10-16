@@ -13,7 +13,7 @@ export class AppServer extends EventEmitter {
     this.child.on("error",e=>{for(const p of this.pending.values())p.reject(e);this.pending.clear();});
     createInterface({input:this.child.stdout}).on("line",line=>{try{this.handle(JSON.parse(line));}catch(e){this.emit("log",`Invalid app-server line: ${e.message}`);}});
     this.child.on("exit",(code)=>{for(const {reject,timer} of this.pending.values()){clearTimeout(timer);reject(new Error(`app-server exited ${code}`));}this.pending.clear();this.emit("exit",code);});
-    await this.request("initialize",{clientInfo:{name:"codex-teams",title:"Codex Teams",version:"0.1.2"},capabilities:{experimentalApi:true}});
+    await this.request("initialize",{clientInfo:{name:"codex-teams",title:"Codex Teams",version:"0.1.3"},capabilities:{experimentalApi:true}});
     this.notify("initialized",{});
     const account=await this.request("account/read",{refreshToken:false});
     if(account.account?.type!=="chatgpt"){await this.stop();throw new Error("Codex Teams requires existing ChatGPT authentication. Run `codex login`; API-key and separately billed provider authentication are refused.");}

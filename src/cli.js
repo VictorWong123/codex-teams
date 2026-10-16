@@ -4,7 +4,7 @@ import { spawn } from 'node:child_process';
 import { join, resolve } from 'node:path';
 import { api } from './http-client.js';
 import { initializeProject } from './project.js';
-import { resolveProject, ensureDir } from './util.js';
+import { resolveProject, ensureDir, idSegment } from './util.js';
 import { DATA_DIR, SERVICE_PORT } from './constants.js';
 import { Registry } from './db.js';
 import { controlLaunchAgent } from './service-control.js';
@@ -19,7 +19,7 @@ const post=(path,body={})=>api(`/api/${path}`,{method:'POST',body:{...body,proje
 const get=path=>api(`/api/${path}${path.includes('?')?'&':'?'}project=${encodeURIComponent(project())}`);
 const health=async()=>{try{const r=await fetch(`http://127.0.0.1:${SERVICE_PORT}/health`,{signal:AbortSignal.timeout(1000)});if(!r.ok)return null;return await r.json();}catch{return null;}};
 try{
- if(!cmd||cmd==='help'||cmd==='--help'){console.log(`cteam 0.1.2 (codex-teams compatible) — Node >=22.22; Codex 0.163.0\n\ninit [path] | status | config [get|set] --file team.json\nroster [list|add|edit|disable|remove|model] [name] --json '{...}'\ngoal [prompt] --lead agent --participants a,b | reopen GOAL --prompt text\nmessage AGENT --body text [--goal ID] [--informational]\ntasks [create|claim|verify|revise] [ID] --json '{...}'\nnotes [add] --json '{"goalId":"...","title":"...","body":"..."}'\nconversations --search text | interrupt --goal ID --agent NAME\npause | resume | stop [--goal ID]\napprovals [resolve ID] --json '{"decision":"decline"}'\nrecovery [inspect|acknowledge] --goal ID [--acknowledge-side-effects]\nservice [start|status|stop] [--foreground] | dashboard [--no-open]\ninstall [--launchagent] | uninstall | self-test [--live]\n\nUse --project PATH_OR_ID for every project command; nearest team.json otherwise.\nModel/config edits: roster model NAME --model MODEL; roster edit NAME --json '{"purpose":"...","permission":"read-only"}'.\nTeams run only on explicit goal/message requests. Login with your own codex login.`);}
+ if(!cmd||cmd==='help'||cmd==='--help'){console.log(`cteam 0.1.3 (codex-teams compatible) — Node >=22.22; Codex 0.163.0\n\ninit [path] | status | config [get|set] --file team.json\nroster [list|add|edit|disable|remove|model] [name] --json '{...}'\ngoal [prompt] --lead agent --participants a,b | reopen GOAL --prompt text\nmessage AGENT --body text [--goal ID] [--informational]\ntasks [create|claim|verify|revise] [ID] --json '{...}'\nnotes [add] --json '{"goalId":"...","title":"...","body":"..."}'\nconversations --search text | interrupt --goal ID --agent NAME\npause | resume | stop [--goal ID]\napprovals [resolve ID] --json '{"decision":"decline"}'\nrecovery [inspect|acknowledge] --goal ID [--acknowledge-side-effects]\nservice [start|status|stop] [--foreground] | dashboard [--no-open]\ninstall [--launchagent] | uninstall | self-test [--live]\n\nUse --project PATH_OR_ID for every project command; nearest team.json otherwise.\nModel/config edits: roster model NAME --model MODEL; roster edit NAME --json '{"purpose":"...","permission":"read-only"}'.\nTeams run only on explicit goal/message requests. Login with your own codex login.`);}
  else if(cmd==='init')out(initializeProject(resolve(sub||flags.project||process.cwd())));
  else if(cmd==='service'){
   if(sub==='status')out(await health()||{ok:false});
@@ -40,19 +40,19 @@ try{
  else if(cmd==='config')out(sub==='set'?await post('config',{config:input()}):await get('config'));
  else if(cmd==='roster'){
   if(!sub||sub==='list')out((await get('status')).config.agents);
-  else{const name=rest[0],config=await get('config'),old=config.agents.find(a=>a.name===name||a.id===name);if(sub==='remove'){if(!old)throw new Error('Agent not found');config.agents=config.agents.filter(a=>a.id!==old.id);out(await post('config',{config}));}
-   else{if(sub!=='add'&&!old)throw new Error('Agent not found');out(await post('agents',{agent:{...old,...input(),...(name&&!old?{name}:{}),...(sub==='disable'?{enabled:false}:{}),...(sub==='model'?{model:flags.model==='inherit'?null:flags.model}:{}),...(flags.model?{model:flags.model==='inherit'?null:flags.model}:{})}}));}}
+  else{const name=rest[0],config=await get('config'),old=config.agents.find(a=>a.id===name)||config.agents.find(a=>a.name===name);if(sub==='remove'){if(!old)throw new Error('Agent not found');config.agents=config.agents.filter(a=>a.id!==old.id);out(await post('config',{config}));}
+   else{if(sub==='add'&&old)throw new Error('Agent already exists; use roster edit to change it');if(sub!=='add'&&!old)throw new Error('Agent not found');out(await post('agents',{createOnly:sub==='add',agent:{...old,...input(),...(name&&!old?{name}:{}),...(sub==='disable'?{enabled:false}:{}),...(sub==='model'?{model:flags.model==='inherit'?null:flags.model}:{}),...(flags.model?{model:flags.model==='inherit'?null:flags.model}:{})}}));}}
  }
  else if(cmd==='goal')out(await post('goals',{prompt:flags.prompt||[sub,...rest].filter(Boolean).join(' '),lead:flags.lead,participants:flags.participants?.split(','),idempotencyKey:flags.key,...input()}));
- else if(cmd==='reopen')out(await post(`goals/${sub}/reopen`,{prompt:flags.prompt,idempotencyKey:flags.key}));
+ else if(cmd==='reopen')out(await post(`goals/${idSegment(sub)}/reopen`,{prompt:flags.prompt,idempotencyKey:flags.key}));
  else if(cmd==='message')out(await post('messages',{recipient:sub,body:flags.body||rest.join(' '),goalId:flags.goal,actionable:!flags.informational,idempotencyKey:flags.key}));
- else if(cmd==='tasks'){if(!sub||sub==='list')out((await get('status')).tasks);else out(await post(sub==='create'?'tasks':`tasks/${rest[0]}/${sub}`,{goalId:flags.goal,agent:flags.agent,...input()}));}
+ else if(cmd==='tasks'){if(!sub||sub==='list')out((await get('status')).tasks);else out(await post(sub==='create'?'tasks':`tasks/${idSegment(rest[0])}/${sub}`,{goalId:flags.goal,agent:flags.agent,...input()}));}
  else if(cmd==='notes')out(sub==='add'?await post('notes',input()):(await get('status')).notes);
  else if(cmd==='conversations'){if(flags.sync)await post('history',{});out(await get(`conversations?search=${encodeURIComponent(flags.search||'')}`));}
- else if(cmd==='participant')out(await post(`goals/${flags.goal}/participants`,{agent:sub}));
+ else if(cmd==='participant')out(await post(`goals/${idSegment(flags.goal)}/participants`,{agent:sub}));
  else if(['pause','resume','stop'].includes(cmd))out(await post('control',{action:cmd,goalId:flags.goal}));
  else if(cmd==='interrupt')out(await post('interrupt',{goalId:flags.goal,agent:flags.agent}));
- else if(cmd==='approvals')out(sub==='resolve'?await post(`approvals/${rest[0]}/resolve`,{response:input()}):(await get('status')).approvals);
+ else if(cmd==='approvals')out(sub==='resolve'?await post(`approvals/${idSegment(rest[0])}/resolve`,{response:input()}):(await get('status')).approvals);
  else if(cmd==='recovery')out(await post('recovery',{action:sub,goalId:flags.goal,acknowledgeSideEffects:!!flags['acknowledge-side-effects']}));
  else throw new Error(`Unknown command ${cmd}; run cteam help`);
 }catch(e){console.error(e.message);process.exitCode=1;}
