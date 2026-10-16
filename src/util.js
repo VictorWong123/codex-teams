@@ -6,7 +6,7 @@ import { dirname, join, resolve } from "node:path";
 export const now = () => new Date().toISOString();
 export const id = () => randomUUID();
 export const json = (value) => JSON.stringify(value);
-export const parse = (value, fallback = null) => { try { return JSON.parse(value); } catch { return fallback; } };
+export const parse = (value, fallback = null) => { try { return JSON.parse(value) ?? fallback; } catch { return fallback; } };
 export function ensureDir(path) { mkdirSync(path, { recursive: true, mode: 0o700 }); return path; }
 export function projectId(path) { return createHash("sha256").update(realpathSync(path)).digest("hex").slice(0, 16); }
 export function token() { return randomBytes(32).toString("hex"); }

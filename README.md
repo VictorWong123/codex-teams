@@ -2,7 +2,7 @@
 
 A local MCP server, CLI and dashboard for persistent project teams. Each goal snapshots an editable roster and gives each participating agent an independent durable Codex app-server thread. The goal chooses its lead. Direct messages, owned tasks/dependencies, captured evidence and lead verification coordinate work; idle roster members use no model turns.
 
-**Release status:** portable Linux package/CLI/MCP/dashboard and mocked security tests are verified. Actual Mac installation, both CLI aliases, Codex MCP registration, consumer ChatGPT authentication reuse and owned LaunchAgent stop/stays-down/start passed on v0.1.0. Real multi-agent model acceptance remains **PENDING**; its first7-second attempt consumed0 turns and correctly blocked inherited app/plugin tools before dispatch. The v0.1.1 hotfix is awaiting the consumer rerun. Cloud task authentication is not consumer authentication and was not used for model turns. The [source repository](https://github.com/VictorWong123/codex-teams) is public. The npm registry package has not been published. See `VALIDATION.md` in the source repository for release evidence.
+**Release status:** portable Linux package/CLI/MCP/dashboard and mocked security tests are verified. Actual Mac installation, both CLI aliases, Codex MCP registration, consumer ChatGPT authentication reuse and owned LaunchAgent stop/stays-down/start passed on v0.1.0. Real multi-agent model acceptance remains **PENDING**; its first7-second attempt consumed0 turns and correctly blocked inherited app/plugin tools before dispatch. On the v0.1.1 consumer rerun, tools isolation and literal unrelated config preservation passed; the first real model turn hit a token-usage processing defect and was held for recovery. v0.1.2 fixes null usage/high-water accounting and best-effort error interruption; its consumer rerun is pending. Cloud task authentication is not consumer authentication and was not used for model turns. The [source repository](https://github.com/VictorWong123/codex-teams) is public. The npm registry package has not been published. See `VALIDATION.md` in the source repository for release evidence.
 
 The primary command is **`cteam`**. **`codex-teams`** remains a compatible alias. The package/repository, MCP entry/tool names, configuration and environment variables retain their existing Codex Teams names.
 
@@ -13,7 +13,7 @@ Requires Node **22.22.0 or later**, npm and **Codex CLI exactly 0.163.0**. Node'
 Install the public versioned release (the tag verification is recorded in the release chat):
 
 ```sh
-npm install -g 'git+https://github.com/VictorWong123/codex-teams.git#v0.1.1'
+npm install -g 'git+https://github.com/VictorWong123/codex-teams.git#v0.1.2'
 codex --version                 # codex-cli 0.163.0
 codex login                     # your own supported ChatGPT login
 cteam install             # backs up Codex config; adds one MCP + usage skill
@@ -24,7 +24,7 @@ cteam dashboard
 
 Credential-free public retrieval and installed CLI/MCP/dashboard checks passed for baseline `264b4c137374aca9d7c71017a7cd841a8f459853` using the explicit HTTPS source URL; the versioned release also includes the owned LaunchAgent stop/start fix. See `VALIDATION.md` for the exact baseline command and test boundaries.
 
-Alternatively install the release tarball with `npm install -g /path/to/codex-teams-0.1.1.tgz`. From a checkout: `npm ci && npm pack`, then globally install that tarball. The npm registry package name is not claimed as published. Restart Codex after adding the MCP entry/skill. Existing settings and unrelated MCP entries are preserved; either conflicting CLI alias (`cteam` or `codex-teams`) or an unrelated MCP entry named `codex-teams` cause installation to refuse before modifying configuration. Supported Codex registration is validated in a private staging config; only the owned MCP table is merged into the original text, preserving unrelated empty arrays/comments. Concurrent config edits detected before commit cause a safe retry.
+Alternatively install the release tarball with `npm install -g /path/to/codex-teams-0.1.2.tgz`. From a checkout: `npm ci && npm pack`, then globally install that tarball. The npm registry package name is not claimed as published. Restart Codex after adding the MCP entry/skill. Existing settings and unrelated MCP entries are preserved; either conflicting CLI alias (`cteam` or `codex-teams`) or an unrelated MCP entry named `codex-teams` cause installation to refuse before modifying configuration. Supported Codex registration is validated in a private staging config; only the owned MCP table is merged into the original text, preserving unrelated empty arrays/comments. Concurrent config edits detected before commit cause a safe retry.
 
 For macOS background startup, after the portable steps run:
 
@@ -121,7 +121,7 @@ cteam self-test             # isolated auth-blocked transport/version probe; zer
 cteam self-test --live      # your own logged-in machine ONLY; <=12 turns /15 wall minutes
 ```
 
-The live command creates a disposable dependency-free Git project, submits the slugify goal through the CLI/service path, requires researcher→developer messaging, implementation/tests, captured evidence and lead verification, then independently checks the output. It writes a bounded report and preserves the disposable project for inspection. It refuses platform-managed Cloud authentication. A pending/blocked result is reported honestly; no API-key fallback is offered. The shared initial real-acceptance budget remains unused in this Cloud release (**0 turns**); coordinate later attempts against the same total budget.
+The live command creates a disposable dependency-free Git project, submits the slugify goal through the CLI/service path, requires researcher→developer messaging, implementation/tests, captured evidence and lead verification, then independently checks the output. It writes a bounded report and preserves the disposable project for inspection. It refuses platform-managed Cloud authentication. A pending/blocked result is reported honestly; no API-key fallback is offered. Cloud used no model turns. The shared consumer acceptance budget has used **1 turn /17.7 seconds** as last reported; coordinate the next attempt against the same12-turn/15-minute total. An internal harness can request a strictly smaller allowance; no CLI budget-widening flags are exposed.
 
 ```sh
 cteam service stop
