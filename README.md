@@ -15,12 +15,13 @@ Install the public, acceptance-tested release through its immutable HTTPS tag ar
 ```sh
 npm install -g https://github.com/VictorWong123/codex-teams/archive/refs/tags/v0.1.3.tar.gz
 codex --version                 # codex-cli 0.163.0
-codex login                     # your own supported ChatGPT login
+codex login status              # reuse your own existing ChatGPT login
 cteam install             # backs up Codex config; adds one MCP + usage skill
 cteam service start
 cteam init /absolute/path/to/project
-cteam dashboard
 ```
+
+The dashboard is optional: run `cteam dashboard` only if you want the browser view. If you are not already logged in, use `codex login` with your own supported ChatGPT account before requesting model work.
 
 Credential-free public HTTPS installation, clean-prefix CLI/MCP/dashboard checks and package audits passed. Live Mac acceptance exercised `f596621f41966717e53aac558d4acd044c261e3d`; terminal recovery follow-up `85c6fc4480368f8431001dd432a54461becc54b1` additionally passed the full portable suite and fresh public-archive installation. Existing release tags remain unchanged. See `VALIDATION.md` for artifact/checksum and test boundaries.
 
@@ -47,6 +48,36 @@ launchctl kickstart "gui/$(id -u)/com.codex-teams.service"
 Linux supports the tested detached service and foreground `cteam service start --foreground`. There is no Linux boot integration. Windows installation/service behavior has not been validated and is unsupported for this release. The dashboard binds **127.0.0.1 only**. `dashboard` opens a credential URL fragment locally; treat the printed URL as private. It is removed from the address bar and kept in tab session storage; **Lock** clears it. Do not forward the port or expose it publicly.
 
 ## Use
+
+The CLI and MCP are first-class clients of the same local service. You can configure roles, submit goals, message agents and control work entirely from a terminal or a Codex chat using MCP. A browser is never required. Each participating agent gets its own durable Codex thread for that goal.
+
+For a headless build, choose an existing project directory and add any role names you want. Initialize each project once; skip `cteam init` below if it is already initialized:
+
+```sh
+cteam service start
+cteam init /absolute/path/to/project
+cd /absolute/path/to/project
+cteam roster add design-lead --json '{"purpose":"Plan and verify the build","instructions":"Break the goal into owned tasks. Inspect the builder workspace and captured tests before verifying completion.","model":"gpt-6.1-sol","permission":"read-only"}'
+cteam roster add source-scout --json '{"purpose":"Research the project","instructions":"Inspect relevant project sources and directly message concrete findings to builder.","model":"gpt-6.1-sol","permission":"read-only"}'
+cteam roster add builder --json '{"purpose":"Implement and test","instructions":"Implement assigned tasks, run focused tests and report captured evidence to design-lead.","model":"gpt-6.1-sol","permission":"inherit"}'
+cteam goal 'Build the requested feature, add edge-case tests and have the lead verify the result' --lead design-lead --participants design-lead,source-scout,builder
+```
+
+Copy the returned goal `id` into `GOAL_ID` below. Only the selected participants join this goal; the starter roster remains available for other work. Model work uses your existing Codex-managed ChatGPT login.
+
+```sh
+cteam message source-scout --goal GOAL_ID --body 'Inspect the relevant interfaces and send findings directly to builder'
+cteam status
+```
+
+The service is detached by default. CLI commands return while agents work; exiting the CLI terminal does not stop that service while the host is awake. Use goal controls when needed, and `service stop` to stop the local daemon:
+
+```sh
+cteam pause --goal GOAL_ID
+cteam resume --goal GOAL_ID
+cteam stop --goal GOAL_ID
+cteam service stop
+```
 
 Ordinary Codex requests never start teams automatically. Ask explicitly for team execution. Normal MCP tools require the calling chat's `cwd` or an explicit `project`; they never infer the daemon's cwd. The service must be running before CLI/MCP operations other than init/install. CLI finds the nearest `.codex-teams/team.json`; `--project /path/or/registered-id` overrides. Created worktree aliases resolve to the owning project.
 

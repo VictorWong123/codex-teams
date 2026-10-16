@@ -99,4 +99,13 @@ Primary accepted installation:
 npm install -g https://github.com/VictorWong123/codex-teams/archive/refs/tags/v0.1.3.tar.gz
 ```
 
-The final main/tag SHA is recorded in the release report after the authorized documentation merge and new annotated tag. Existing tags are immutable. The separately packed follow-up artifact contains213 files and is91,518 bytes; SHA-256 `8f930fb042b262ff8e1220fbffcdef95d8c26efda46fdc38845bfd29a9f1504b`. This checksum describes that npm-packed artifact, not the GitHub source archive. Package audit reported no findings.
+The annotated v0.1.3 tag object is `0232b5b330d1b3309ef3249d94ddcc3b8c093a8f`, targeting `8919d295d4cf14323444207efa72771c14bb0f45`. Later documentation commits do not move that tag. Existing tags are immutable. The separately packed follow-up artifact contains213 files and is91,518 bytes; SHA-256 `8f930fb042b262ff8e1220fbffcdef95d8c26efda46fdc38845bfd29a9f1504b`. This checksum describes that npm-packed artifact, not the GitHub source archive. Package audit reported no findings.
+
+
+## Installed terminal-only workflow — PASSED
+
+Eight focused check groups passed against the installed v0.1.3 package from a fresh public-tag prefix using independent CLI processes only. No browser, MCP client or direct-HTTP test script was used. The detached service stayed alive after its starting CLI exited and across subsequent client exits.
+
+The check initialized a project; configured three arbitrary roles with free-text purposes/instructions, permissions and inherited/override models; selected a goal lead/participants; verified immutable snapshots and goal retries; sent actionable/informational messages with matching retry responses; exercised task claims/dependency blocking/missing-evidence rejection; saved notes/searched conversations; used goal controls and explicit project selection from another cwd; and explicitly stopped the daemon, after which service status reported `ok:false`.
+
+The project remained paused during orchestration checks; all goals were stopped before project resume. A trap Codex executable was never invoked: **0 Codex processes, authentication/provider calls or model turns**. This verifies headless configuration, transport and lifecycle behavior without claiming another live code build. The separate actual Mac CLI-driven model acceptance remains the f596621 evidence above.
