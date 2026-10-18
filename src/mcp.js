@@ -11,7 +11,7 @@ import { initializeProject } from "./project.js";
 import { resolveProject, idSegment } from "./util.js";
 
 if(process.env.CODEX_TEAMS_MEMBER_CONTEXT==='1')throw new Error('Human MCP is unavailable to team members');
-const server=new McpServer({name:"codex-teams",version:"0.1.3"}), out=v=>({content:[{type:"text",text:JSON.stringify(v,null,2)}]});
+const server=new McpServer({name:"codex-teams",version:"0.1.4"}), out=v=>({content:[{type:"text",text:JSON.stringify(v,null,2)}]});
 const context={cwd:z.string().refine(isAbsolute,'Caller cwd must be absolute').optional().describe("Calling Codex chat's working directory"),project:z.string().optional().describe("Explicit initialized project path")};
 function p(i){if(!i.cwd&&!i.project)throw new Error("cwd or project is required; Codex Teams never uses a global current project");const registered=i.project&&new Registry().find(i.project);if(i.project&&!registered&&!i.cwd&&!isAbsolute(i.project))throw new Error("Relative project override requires an explicit caller cwd");return resolveProject(i.cwd,registered?.root||i.project);}
 server.registerTool("team_initialize",{description:"Initialize a persistent team for a project only when the user explicitly requests it",inputSchema:{project:z.string().refine(isAbsolute,'Initialization requires an absolute project path')}},async i=>out(initializeProject(i.project)));
