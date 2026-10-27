@@ -114,6 +114,19 @@ service dashboard and do not reuse local app-server thread IDs or database goals
   It exercised the workflow before packaging; automatic activation of the final
   hosted plugin remains pending. No separately authenticated Codex model process,
   API key, copied credential or guard removal was involved.
+- A second disposable project installed the skill from the packed npm artifact
+  and built a to-do app in this Cloud session. Researcher, builder and independent
+  reviewer read the installed workflow. Direct research-to-builder messaging
+  worked. Review found keyboard focus loss after list mutations; a follow-up to
+  the same builder fixed it, and independent Chromium tests verified the fix.
+  The final app passed all 11 Node tests and 19 browser check groups: CRUD,
+  filters/counts, reload persistence, keyboard input/focus, malformed/unavailable
+  storage, literal hostile text, 390px layout, page errors and unsafe routes.
+  Four worker assignments and one correction round completed within ten minutes.
+  Test browsers/servers stopped and the disposable project was deleted at the
+  user's request. This validates packaged filesystem installation and a fresh
+  project with a real correction loop, still in the existing host chat/account;
+  it does not establish automatic hosted-plugin activation or universal access.
 - Codex 0.163.0's actual `skills/list` found the installed skill enabled at user
   scope from two different project directories, using an isolated unauthenticated
   Codex home. This establishes filesystem discovery, not hosted catalog ingestion.
