@@ -1,0 +1,6 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "codex-teams-native",
+  "version": "0.1.0",
+  "description": "Coordinate project teams in an active Codex or ChatGPT Work chat with native subagents. Requires host subagent tools; no background daemon."
+}

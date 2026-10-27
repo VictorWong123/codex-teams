@@ -37,7 +37,9 @@
     "SECURITY.md",
     "PROTOCOL.md",
     "protocol/",
-    "VALIDATION.md"
+    "VALIDATION.md",
+    "plugins/",
+    "CLOUD.md"
   ],
   "keywords": [
     "codex",

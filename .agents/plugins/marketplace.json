@@ -1,0 +1,10 @@
+{
+  "name": "codex-teams",
+  "interface": { "displayName": "Codex Teams" },
+  "plugins": [{
+    "name": "codex-teams-native",
+    "source": { "source": "local", "path": "./plugins/codex-teams-native" },
+    "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
+    "category": "Productivity"
+  }]
+}
