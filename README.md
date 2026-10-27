@@ -12,6 +12,8 @@ Free, open-source software that runs on your own computer. Model work requires y
 | Linux | Portable tests, clean package installation, MCP and local service checked. No system boot integration. |
 | Windows | **Coming soon.** Installation and service behavior are not validated or supported yet. |
 
+**Security update (2026-10-27, unreleased):** A fresh audit of the v0.1.4 lockfile found advisories in Zod, body-parser and fast-uri. This branch updates them to 4.6.7, 2.4.0 and 3.1.9, respectively, with 51 passing tests and zero current audit findings. The versioned v0.1.4 download above remains unchanged and does not contain this update. See [validation](VALIDATION.md#security-maintenance--2026-10-27) for verification and limitations.
+
 **Release status:** v0.1.4 updates release metadata, public installation instructions and platform guidance. All 50 portable/security tests pass with Codex 0.163.0; the dependency audit reports no known vulnerabilities. Previously recorded Mac acceptance used 4 model turns in 156.17 seconds for the successful v0.1.3 QA run. No new live model run or Mac test is claimed for v0.1.4. See [validation](VALIDATION.md) for exact revisions, aggregate acceptance limits and pending sleep/wake checks.
 
 The primary command is **`cteam`**. **`codex-teams`** remains a compatible alias. The package/repository, MCP entry/tool names, configuration and environment variables retain their existing Codex Teams names.

@@ -124,3 +124,17 @@ Current Linux validation:
 - The isolated self-test with matching Codex reached the expected missing-ChatGPT-authentication limit and remained **PENDING**, with zero model turns. No authentication was copied or requested. Previous actual Mac acceptance remains recorded under v0.1.3; no new Mac, live model, sleep/wake or Windows validation is claimed.
 
 Public distribution is the immutable Git tag archive at `https://github.com/VictorWong123/codex-teams/archive/refs/tags/v0.1.4.tar.gz`, with documentation at `https://github.com/VictorWong123/codex-teams#readme`. The npm registry name `codex-teams` belongs to a different repository (`skrabe/codex-teams`); do not install that bare package name to obtain this project. No npm registry publication is claimed. Windows is **coming soon**, currently unsupported. Release hosting and docs are free; consumer model work still requires the consumer's own supported account.
+
+## Security maintenance — 2026-10-27
+
+Fresh verification began at v0.1.4 (`4c7578b8ac19fe0af5950d5b5127f963a0045178`). All original 50 tests and syntax checks passed on Node 24.19.0 with Codex 0.163.0, zero skips. The prior dependency audit result is historical: a new audit reported high advisories for body-parser (GHSA-27r3-jxmh-p828) and Zod (GHSA-mrhx-c7xc-m3w5), and moderate/low advisories for fast-uri. These are dependency findings; this review does not establish exploitability of every affected code path in this application.
+
+The maintenance branch updates Zod to 4.6.7, body-parser to 2.4.0 and fast-uri to 3.1.9. Zod 4 records explicitly define string keys. Partial roster edits discard defaults for omitted fields before merging, preventing a purpose-only edit from changing permission, enabled state or instructions. Regression coverage exercises these behaviors through the actual MCP SDK, config round trips, valid user-input approvals and unknown-question rejection.
+
+All 51 tests pass with zero skips; syntax checks pass; npm audit reports zero known vulnerabilities. Independent focused reviews of HTTP authentication, member scope, CSRF, dashboard rendering and the migration found no actionable exploitable issue in the reviewed scope. This is not a guarantee that the software has no security issues.
+
+A packed installation in a fresh local prefix passed CLI help/init, detached service startup, dashboard HTTP, unauthenticated rejection (401), cross-origin rejection (403), actual MCP handshake/list of 17 tools/status, and service shutdown. The check selected a non-model executable and consumed zero model turns. No new interactive browser or macOS test is claimed.
+
+The updated Cloud network policy permits chatgpt.com and the Codex endpoint responds through the proxy. Live self-test still returns PENDING before model dispatch because platform-managed Cloud authentication is not consumer-owned authentication. The isolated auth probe also returns PENDING as expected. No credentials were copied, restrictions bypassed or API fallback used. Earlier recorded Mac acceptance remains separate historical evidence; no new live acceptance is claimed.
+
+The GitHub repository is public and already supplies MIT licensing and first-party README/SECURITY/PROTOCOL documentation. This maintenance branch does not change existing release tags or publish a new release.

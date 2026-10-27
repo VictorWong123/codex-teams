@@ -9,7 +9,7 @@ export function approvalResponse(method,input,params={}){
   for(const kind of ['read','write'])if(v.permissions.fileSystem?.[kind]?.some(p=>!requested.fileSystem?.[kind]?.includes(p)))throw new Error('Cannot grant unrequested filesystem permission');return v;
  }
  if(method==='item/tool/requestUserInput'){
-  const v=z.object({answers:z.record(z.object({answers:z.array(z.string())}).strict())}).strict().parse(input);
+  const v=z.object({answers:z.record(z.string(),z.object({answers:z.array(z.string())}).strict())}).strict().parse(input);
   if(Object.keys(v.answers).some(k=>!params.questions?.some(q=>q.id===k)))throw new Error('Unknown input question');return v;
  }
  if(method==='mcpServer/elicitation/request')return z.object({action:z.enum(['accept','decline','cancel']),content:z.unknown().nullable(),_meta:z.unknown().nullable().default(null)}).strict().parse(input);

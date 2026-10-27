@@ -15,3 +15,7 @@ Installer/uninstaller preflight both CLI aliases (`cteam` and compatible `codex-
 If you find a vulnerability, report it privately to the repository owner through GitHub's available private reporting/contact mechanism. Do not publish tokens or user conversation data in issues. This release has no hosted service or shared consumer credentials.
 
 The v0.1.1 configuration hotfix validates supported Codex MCP edits against a private temporary copy, then merges only the owned table into the original bytes. A final comparison and atomic replacement reject detected concurrent user edits. No authentication/session files are copied; staged configuration is removed afterward. Per-thread explicit disabled transports also suppress the known runtime-injected codex_apps/cua_repl sources absent from config/read; unknown extra tools still fail closed.
+
+### Current dependency maintenance
+
+The 2026-10-27 maintenance branch replaces vulnerable Zod 3.25.76 with 4.6.7 and updates transitive body-parser/fast-uri to 2.4.0/3.1.9. Its audit reports zero known vulnerabilities; the immutable v0.1.4 tag retains the older dependencies. See VALIDATION.md for checks and scope. A clean audit is not proof of absence of vulnerabilities.

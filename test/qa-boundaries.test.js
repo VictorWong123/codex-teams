@@ -42,6 +42,12 @@ test('actual MCP SDK binds caller context, task scope and UUIDs and supports par
   const status=toolValue(await call('team_status',{}));assert.equal(status.project.root,f.a.root);
   assertToolError(await client.callTool({name:'team_status',arguments:{project:'sub'}}));
   const agent=a.findAgent('developer');const edited=toolValue(await call('team_roster',{agent:{id:agent.id,purpose:'Changed by stable ID'}}));assert.equal(edited.id,agent.id);assert.equal(edited.name,'developer');assert.equal(edited.purpose,'Changed by stable ID');
+  const restricted=toolValue(await call('team_roster',{agent:{id:agent.id,permission:'read-only',enabled:false,instructions:'Preserve instructions'}}));
+  const partial=toolValue(await call('team_roster',{agent:{id:agent.id,purpose:'Only purpose changes'}}));
+  assert.equal(partial.permission,'read-only');assert.equal(partial.enabled,false);assert.equal(partial.instructions,restricted.instructions);
+  toolValue(await call('team_roster',{agent:{id:agent.id,enabled:true}}));
+  const configuration=toolValue(await call('team_config',{}));
+  assert.deepEqual(toolValue(await call('team_config',{config:configuration})),configuration);
   assertToolError(await call('team_notes',{goalId:goal.id,title:'Must not become a list',body:''}));assert.equal(a.row('SELECT count(*) n FROM notes').n,0);
   assertToolError(await call('team_tasks',{action:'create',goalId:goal.id,task:{title:'Cross-context injection',project:f.b.root,goalId:other.id}}));assert.equal(a.row('SELECT count(*) n FROM tasks').n,0);assert.equal(b.row('SELECT count(*) n FROM tasks').n,0);
   const task=toolValue(await call('team_tasks',{action:'create',goalId:goal.id,task:{title:'Bound to caller',owner:'developer'}}));assert.equal(task.goalId,goal.id);assert.ok(a.task(task.id));assert.equal(b.task(task.id),null);
