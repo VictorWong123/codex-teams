@@ -18,6 +18,16 @@ Free, open-source software that runs on your own computer. Model work requires y
 
 The primary command is **`cteam`**. **`codex-teams`** remains a compatible alias. The package/repository, MCP entry/tool names, configuration and environment variables retain their existing Codex Teams names.
 
+## Cloud or native chat teams (experimental, unreleased)
+
+A separate [native chat workflow](CLOUD.md) uses the active chat's own subagents
+in eligible Cloud or local hosts. A real Cloud researcher-to-builder correction
+passed 20 tests plus independent lead assertions. The new `cteam native install`
+command installs reusable instructions; it does not launch agents or grant host
+capabilities. The local persistent runner below remains a separate choice.
+Hosted plugin installation and multi-account availability are not yet verified.
+The v0.1.4 download above does not contain this feature.
+
 ## Install
 
 Requires Node **22.22.0 or later**, npm and **Codex CLI exactly 0.163.0**. Node's built-in SQLite may display an experimental warning on Node 22. Existing Codex-managed **ChatGPT login** is required only for model work. There is no API-key/provider fallback, shared account, token copying or credit purchase.
