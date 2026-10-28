@@ -42,9 +42,9 @@ export async function verifyInstall(){
   client=new Client({name:'cteam-install-verification',version:'1.0.0'});
   await client.connect(new StdioClientTransport({command:process.execPath,args:[resolve(import.meta.dirname,'../src/mcp.js')],cwd:other,env,stderr:'pipe'}),{timeout:5000});
   assert.equal(client.getServerVersion().version,report.packageVersion);
-  assert.equal((await client.listTools({}, {timeout:5000})).tools.length,17);
+  assert.equal((await client.listTools({}, {timeout:5000})).tools.length,25);
   const status=await client.callTool({name:'team_status',arguments:{cwd:project}},undefined,{timeout:5000});assert.notEqual(status.isError,true);assert.equal(JSON.parse(status.content[0].text).project.root,project);
-  assert.equal((await client.callTool({name:'team_status',arguments:{}},undefined,{timeout:5000})).isError,true);check('actual MCP handshake, 17 tools and caller context isolation');
+  assert.equal((await client.callTool({name:'team_status',arguments:{}},undefined,{timeout:5000})).isError,true);check('actual MCP handshake, 25 tools and caller context isolation');
   assert.equal(existsSync(marker),false,'Codex unexpectedly invoked');check('no Codex invocation');
   report.status='PASSED';
  }catch(error){report.error=error.message;}
