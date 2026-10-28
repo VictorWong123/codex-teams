@@ -9,8 +9,11 @@ import { DATA_DIR, SERVICE_PORT } from './constants.js';
 import { Registry } from './db.js';
 import { controlLaunchAgent } from './service-control.js';
 import { install, uninstall } from './install.js';
-const args=process.argv.slice(2),flags={};const words=[];
-for(let i=0;i<args.length;i++){if(args[i].startsWith('--')){const name=args[i].slice(2);flags[name]=['foreground','launchagent','no-open','disabled','informational','acknowledge-side-effects','live','sync'].includes(name)?true:args[++i];}else words.push(args[i]);}
+import {parseArgs,commandHelp} from './cli-options.js';
+const args=process.argv.slice(2);let parsed;
+try{parsed=parseArgs(args);}catch(e){console.error(e.message);process.exit(1);}
+if(parsed.help){console.log(commandHelp(parsed.cmd));process.exit(0);}
+const flags=parsed.flags,words=parsed.words;
 const [cmd,sub,...rest]=words;
 const out=v=>console.log(JSON.stringify(v,null,2));
 const input=()=>flags.json?JSON.parse(flags.json):flags.file?JSON.parse(readFileSync(flags.file,'utf8')):{};
