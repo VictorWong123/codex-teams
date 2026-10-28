@@ -118,3 +118,19 @@ test('goal operations retain immutable participant identities after roster renam
   assert.equal(current.goalAgent(goal.id,'developer').id,worker.id);assert.equal(current.goalAgent(goal.id,'coordinator').id,lead.id);
  }finally{current.close();s.close();await f.close();}
 });
+
+test('terminal cleanup uncertainty can be reviewed without resurrection before explicit original-thread reopen',async()=>{
+ const f=await fixture(),s=f.a.store();
+ try{
+  for(const terminal of ['completed','stopped']){
+   const goal=s.createGoal(`${terminal} cleanup marker`),lead=s.findAgent('coordinator'),turn=id(),thread=`original-${terminal}`,completed=terminal==='completed'?new Date().toISOString():null;
+   s.db.prepare('UPDATE goals SET status=?,completed_at=? WHERE id=?').run(terminal,completed,goal.id);
+   s.db.prepare("UPDATE participants SET thread_id=?,status='recovery_review' WHERE goal_id=? AND agent_id=?").run(thread,goal.id,lead.id);
+   s.db.prepare("INSERT INTO turns(id,goal_id,agent_id,thread_id,status,prompt,started_at,uncertain) VALUES(?,?,?,?,'recovery_review','completed-goal cleanup',?,1)").run(turn,goal.id,lead.id,thread,new Date().toISOString());
+   assert.equal((await f.req(`goals/${goal.id}/reopen`,{})).status,400);const messageCount=s.row('SELECT count(*) n FROM messages').n;
+   const ack=await f.req('recovery',{goalId:goal.id,action:'acknowledge',acknowledgeSideEffects:true});assert.equal(ack.status,200);assert.equal(ack.data.status,terminal);assert.equal(s.requireGoal(goal.id).status,terminal);assert.equal(s.requireGoal(goal.id).completed_at,completed);assert.equal(s.row('SELECT uncertain FROM turns WHERE id=?',turn).uncertain,0);assert.equal(s.row('SELECT status FROM turns WHERE id=?',turn).status,'reviewed');assert.equal(s.row('SELECT count(*) n FROM messages').n,messageCount);assert.equal(f.app.calls.filter(c=>c.method==='turn/start').length,0);
+   assert.equal((await f.req('recovery',{goalId:goal.id,action:'acknowledge',acknowledgeSideEffects:true})).status,400);assert.equal(s.requireGoal(goal.id).status,terminal);
+   const reopened=await f.req(`goals/${goal.id}/reopen`,{prompt:'Explicitly reopen reviewed original work',idempotencyKey:`reopen-${terminal}`});assert.equal(reopened.status,200);assert.equal(s.requireGoal(goal.id).status,'running');assert.equal(s.row('SELECT thread_id FROM participants WHERE goal_id=? AND agent_id=?',goal.id,lead.id).thread_id,thread);assert.equal(s.row('SELECT count(*) n FROM messages WHERE goal_id=?',goal.id).n,1);
+  }
+ }finally{s.close();await f.close();}
+});

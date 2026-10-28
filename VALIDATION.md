@@ -1,11 +1,11 @@
 # Release validation — 2026-10-16
 
-Implementation started from exact handoff `2e69034980c79720136db6e9057c7a2c7493d5ca`. This document distinguishes portable Cloud checks from actual consumer Mac/model evidence. The accepted public implementation revision is `4f15f5ca2512d1938824b00f55a2a76c7e9219b4` (v0.1.2). Tarball checksums and final documentation commit/push evidence are reported with the release in the Cloud chat.
+Implementation started from exact handoff `2e69034980c79720136db6e9057c7a2c7493d5ca`. This document distinguishes portable Cloud checks from actual consumer Mac/model evidence. The accepted release is v0.1.3: actual Mac live QA exercised `f596621f41966717e53aac558d4acd044c261e3d`; terminal recovery follow-up `85c6fc4480368f8431001dd432a54461becc54b1` passed portable checks and fresh public-archive installation. Its separate Mac terminal-recovery check remains unreported. Tarball checksums and final documentation commit/push evidence are reported with the release in the Cloud chat.
 
 ## Portable/mocked checks
 
 - Syntax checks pass for every source/dashboard/script module.
-- Forty-three substantive automated regressions cover validated arbitrary rosters/stable snapshots/model inheritance; goal/message/claim idempotency; task dependencies/current-attempt evidence; misleading/trivial commands; method-aware approval subsets; pre-response event buffering; stale/duplicate turn item isolation; informational delivery; dispatch recovery; terminal-goal isolation; time/token/turn caps and approval-aware accounting; missing/failed/unexpected member tools; Host/Origin/CSRF/scope/body limits; setup cancellation queue rollback; cross-goal agent/writable-workspace serialization; and nine mocked LaunchAgent control tests covering exact command selection, unloaded idempotency, ownership/path refusal, failure handling and portable bypass. Five alias/MCP tests additionally cover the primary `cteam` bin and compatible `codex-teams`, both-path collision preflight, matching relative npm links, preservation of unrelated files/links on uninstall, and unchanged normal MCP identity/tools.
+- The historical v0.1.2 checkpoint passed43 substantive automated regressions covering validated arbitrary rosters/stable snapshots/model inheritance; goal/message/claim idempotency; task dependencies/current-attempt evidence; misleading/trivial commands; method-aware approval subsets; pre-response event buffering; stale/duplicate turn item isolation; informational delivery; dispatch recovery; terminal-goal isolation; time/token/turn caps and approval-aware accounting; missing/failed/unexpected member tools; Host/Origin/CSRF/scope/body limits; setup cancellation queue rollback; cross-goal agent/writable-workspace serialization; and nine mocked LaunchAgent control tests covering exact command selection, unloaded idempotency, ownership/path refusal, failure handling and portable bypass. Its five alias/MCP tests cover the primary `cteam` bin and compatible `codex-teams`, both-path collision preflight, matching relative npm links, preservation of unrelated files/links on uninstall, and unchanged normal MCP identity/tools.
 - Portable tests were exercised on the user's required Node22.22.1 and current Node24 runtime. These mocked app-server tests do not establish model behavior.
 - Independent mocked HTTP scenarios additionally exercised original-thread reopen, fresh-goal thread IDs, originating-goal notes, explicit active participant thread creation, goal-local pause, saturated concurrency and approval-wait exclusion.
 - Chromium exercised roster/configuration saves, arbitrary agent fields/model/permissions, goals/standalone assignment, safe literal hostile text, mobile390px layout, expanded details retained across polls, dirty JSON retained and project-bound, project changes cancel agent drafts, saved/custom goal selection, persistent recovery inspection, archive search beyond latest500 retained after blur/polls/manual refresh, and Lock credential clearing. No script execution/XSS, overflow or browser errors were observed.
@@ -45,7 +45,7 @@ Implementation started from exact handoff `2e69034980c79720136db6e9057c7a2c7493d
 - Actual Mac v0.1.2 LaunchAgent installation and owned stop/start passed. Both CLI aliases, fresh MCP initialize/list17tools and context rejection passed; unrelated parsed Codex configuration values including literal args=[] were preserved.
 - Cleanup limitation: although the goal completed and both tasks were verified, shutdown marked the lead's last terminal turn `recovery_review`. This is a recorded cleanup marker; the evidence does **not** claim every terminal turn finished normally.
 
-## Accepted release artifact
+## Historical v0.1.2 release artifact
 
 ```sh
 npm install -g https://github.com/VictorWong123/codex-teams/archive/refs/tags/v0.1.2.tar.gz
@@ -53,12 +53,12 @@ npm install -g https://github.com/VictorWong123/codex-teams/archive/refs/tags/v0
 
 The tag is immutable and points to the accepted commit. The consumer installed the public commit HTTPS archive; this tag archive serves the same accepted source and avoids local Git SSH URL rewrites. Root separately verified the explicit `git+https://github.com/VictorWong123/codex-teams.git#4f15f5ca2512d1938824b00f55a2a76c7e9219b4` installation.
 
-The separately audited npm-packed v0.1.2 tarball (not the GitHub source archive) contains 213 files and is 87,858 bytes. SHA-256: `14f0db14e7690694bb08f362544530a212cc96bd59583850f0b65eff40408882`. Package/source audit reported no findings. Existing release tags remain unchanged; this evidence update is documentation only.
+The separately audited npm-packed v0.1.2 tarball (not the GitHub source archive) contains 213 files and is 87,858 bytes. SHA-256: `14f0db14e7690694bb08f362544530a212cc96bd59583850f0b65eff40408882`. Package/source audit reported no findings. The v0.1.2 tag remains unchanged; this historical artifact is separate from v0.1.3 below.
 
 ## Remaining verification and limits
 
 - Actual Mac uninstall/reinstall passed: `cteam uninstall` exited0; the main token and registry SHA-256 values stayed unchanged; unrelated parsed Codex configuration exactly matched the first backup, including node_repl.args=[]; `cteam install --launchagent` exited0 and restored integration. Sleep/wake behavior and unreported host checks are not claimed.
-- The completed-goal lead-turn cleanup marker above remains a known limitation. No production behavior is changed by this evidence update.
+- Completed goals can retain a lead-turn cleanup review marker. The v0.1.3 follow-up permits explicit acknowledgement without resurrecting a terminal goal, then a separate explicit reopen; portable checks passed and its separate Mac check remains unreported.
 - Windows remains unsupported/unvalidated, and no npm registry publication is claimed. Public GitHub installation and the audited package are available.
 
 ## v0.1.1 targeted hotfix
@@ -73,16 +73,30 @@ The actual Mac v0.1.1 lead started its first model turn and read the local speci
 
 The patch makes explicit JSON null honor parser fallbacks, preserves a cumulative per-thread high-water token count across duplicate/stale updates and subsequent turns, and best-effort interrupts a known Codex turn before event-error tracking is dropped. Recorded payload regression uses totalTokens22014 and tests duplicates, stale lower totals, next-turn baselines, old-turn rejection and enforced token limits. An internal selfTest({turns,wallMinutes}) option is validated <=12/15 with fractional remaining minutes and an entry-relative deadline; the public default stays12/15. The v0.1.2 consumer rerun subsequently passed as recorded above.
 
-## v0.1.3 installed-functionality QA candidate
+## v0.1.3 installed-functionality QA — PASSED
 
-Work is isolated on `qa/installed-functionality`, based on accepted documentation main `d291f86a2be96888d20e80b378731387e170aa77`. Candidate v0.1.3 has not replaced the accepted v0.1.2 install or moved any release tag. Consumer installed-host QA remains the release checkpoint. No Cloud model turns were consumed.
+QA was isolated on `qa/installed-functionality`, based on documentation main `d291f86a2be96888d20e80b378731387e170aa77`. The owner authorized merging the accepted QA branch after the actual Mac checks below. Existing release tags are not moved. No Cloud model turns were consumed.
 
-- Forty-nine automated regressions passed on Node22.22.1 and Node24 with the matching Codex0.163 executable and zero skipped tests. Six new tests exercise the actual MCP SDK and HTTP state transitions: caller-relative project context; task payload scope; invalid UUID/path routing; paused message retry response equality; partial roster edits; empty-note rejection; recovery/stop races; atomic reopen validation/idempotency; duplicate Add refusal; ID-first removal; missing-ID persistence; and immutable goal identities for claim, verify, interrupt and completion.
+- Fifty automated regressions passed on Node22.22.1 and Node24 with the matching Codex0.163 executable and zero skipped tests. Seven new tests exercise the actual MCP SDK and HTTP state transitions: caller-relative project context; task payload scope; invalid UUID/path routing; paused message retry response equality; partial roster edits; empty-note rejection; recovery/stop races; atomic reopen validation/idempotency; duplicate Add refusal; ID-first removal; missing-ID persistence; and immutable goal identities for claim, verify, interrupt and completion.
 - Project overrides resolve against the caller's explicit absolute cwd. Nested task records cannot replace the bound project/goal. UUID path segments and exact service route lengths reject a traversal-shaped task identifier without reopening the stopped goal. Normal MCP still exposes17 tools.
 - Goal-bound operations use original participant snapshots after live roster rename, disable or removal. Stable IDs take precedence over ID-like display names. Hand-authored roster entries without IDs receive persisted canonical IDs. Goal lead/task-owner labels and goal-scoped recipient choices use those snapshots.
-- Recovery acknowledgement requires genuine uncertain review turns and a matching control generation after authoritative history returns. A concurrent human stop wins. Reopen validates before mutating and commits lifecycle/message effects atomically; repeated matching idempotency keys enqueue once.
+- Recovery acknowledgement requires genuine uncertain review turns and a matching status/control generation after authoritative history returns. A concurrent human stop wins. Completed/stopped goals with the recorded cleanup marker can acknowledge that uncertainty while retaining their terminal status and completion timestamp, without messages or redispatch; only a subsequent explicit reopen starts work. Reopen validates before mutating and commits lifecycle/message effects atomically; repeated matching idempotency keys enqueue once. A seventh QA regression exercises both terminal marker states, acknowledgement, no-ambiguity refusal and original-thread reopen; all seven affected tests passed after this follow-up.
 - Message creation and matching retries return the same camelCase public shape. The retry retains the same message ID and reads its current status; dashboard/status database rows retain their existing representation.
 - Actual Chromium verified registry discovery: A/B→newC manual Refresh preserves selectedA, dirty config, goal prompt/criteria, lead and participant selections; an initially empty dashboard discovers/selects the first initialized project by polling without reload/relogin. Both cases had no page errors and fixtures were closed with zero model turns. Goal lead/task-owner labels also retained original snapshot names after live roster rename/removal.
 - Independent finite Chromium checks passed all five reported form cases (16 checks, no page errors): explicitly empty participant selection persists; goal recipients include original disabled/removed participants while standalone choices use enabled live roster; whitespace goals send no request; duplicate Add preserves the existing agent; and Lock/reconnect resets drafts. Independent security/SDK probes passed recovery boundaries, context/payload validation and malicious identifier/suffix rejection. These are portable and mocked-service checks, not additional live-model acceptance.
 
-Final candidate package/install checks and the consumer installed-host report will be recorded against the exact QA commit before release authorization.
+Actual installed Mac acceptance at `f596621f41966717e53aac558d4acd044c261e3d`:
+
+- `selfTest({live:true,turns:6,wallMinutes:10})` returned **PASSED**:4 model turns /156.17 seconds. Flags for own ChatGPT authentication, direct research message, captured test evidence, lead verification, independent slugify assertions and npm test were all true. The goal completed and both tasks were VERIFIED.
+- Fresh MCP/CLI testing passed16 regressions; actual Chrome passed6 reported dashboard bug cases, including registry discovery and draft preservation. Service stop/start retained the same3 thread IDs without duplicate execution. Configuration and the main token were preserved. Persisted IDs after service restart do not establish sleep/wake or authoritative resumed-thread behavior.
+- Shared use across all actual attempts is **10 model turns /403.666 seconds** (earlier6/247.496 plus4/156.17), below the original12-turn/15-minute total. No API-key fallback, copied credentials or Cloud model turns were used.
+
+Final terminal-cleanup follow-up `85c6fc4480368f8431001dd432a54461becc54b1` passed50/50 full portable regressions on both Node22.22.1 and Node24 with zero skipped tests. Independent finite security probes confirmed completed/stopped uncertainty acknowledgement preserves terminal status before explicit reopen. A fresh credential-free public HTTPS commit-archive installation passed CLI/MCP checks with0 model turns. These checks are distinct from the actual Mac live run on `f596621`; the follow-up's separate Mac terminal-recovery check remains unreported.
+
+Primary accepted installation:
+
+```sh
+npm install -g https://github.com/VictorWong123/codex-teams/archive/refs/tags/v0.1.3.tar.gz
+```
+
+The final main/tag SHA is recorded in the release report after the authorized documentation merge and new annotated tag. Existing tags are immutable. The separately packed follow-up artifact contains213 files and is91,518 bytes; SHA-256 `8f930fb042b262ff8e1220fbffcdef95d8c26efda46fdc38845bfd29a9f1504b`. This checksum describes that npm-packed artifact, not the GitHub source archive. Package audit reported no findings.
