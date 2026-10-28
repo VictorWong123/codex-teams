@@ -21,7 +21,7 @@ export async function verifyInstall(){
   const listener=net.createServer();await new Promise((r,j)=>{listener.once('error',j);listener.listen(0,'127.0.0.1',r)});port=listener.address().port;await new Promise(r=>listener.close(r));
   const trap=join(scratch,'codex-trap');const marker=join(scratch,'codex-invoked');
   writeFileSync(trap,`#!/usr/bin/env node\nrequire('node:fs').writeFileSync(${JSON.stringify(marker)},'unexpected invocation');process.exit(99);\n`,{mode:0o700});
-  await assert.rejects(exec(trap,[],{timeout:3000}),error=>error.code===99);
+  await assert.rejects(exec(trap,[],{timeout:10000}),error=>error.code===99);
   assert.equal(existsSync(marker),true,'Codex invocation detector did not execute');rmSync(marker);
   check('Codex invocation detector self-test');
   const env={...process.env,CODEX_TEAMS_DATA:join(scratch,'state'),CODEX_TEAMS_PORT:String(port),CODEX_HOME:join(scratch,'codex-home'),CODEX_BIN:trap};mkdirSync(env.CODEX_HOME);

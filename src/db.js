@@ -8,7 +8,7 @@ import { validateConfig } from "./config.js";
 import { DATA_DIR } from "./constants.js";
 import { ensureDir, id, json, now, parse, projectId, token } from "./util.js";
 
-const schema = `
+export const schema = `
 PRAGMA journal_mode=WAL; PRAGMA foreign_keys=ON;
 CREATE TABLE IF NOT EXISTS agents(id TEXT PRIMARY KEY,name TEXT UNIQUE NOT NULL,purpose TEXT NOT NULL,instructions TEXT NOT NULL,model TEXT NOT NULL,enabled INTEGER NOT NULL DEFAULT 1,created_at TEXT NOT NULL,updated_at TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS goals(id TEXT PRIMARY KEY,title TEXT NOT NULL,prompt TEXT NOT NULL,status TEXT NOT NULL,lead_agent_id TEXT NOT NULL,config_json TEXT NOT NULL,turn_count INTEGER NOT NULL DEFAULT 0,token_count INTEGER NOT NULL DEFAULT 0,started_at TEXT,created_at TEXT NOT NULL,updated_at TEXT NOT NULL,completed_at TEXT);

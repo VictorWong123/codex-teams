@@ -36,7 +36,7 @@ export async function createService({port=SERVICE_PORT,registry=new Registry(),a
   if(url.pathname==='/api/shutdown'&&req.method==='POST'){if(scoped)throw failure(403,'Human only');send(res,200,{stopped:true});setImmediate(()=>server.emit('shutdown'));return;}
   const body=await readBody(req),route=url.pathname.slice(5).split('/').filter(Boolean),method=req.method;
   if(route[0]==='projects'&&route.length===1&&method==='GET'){if(scoped)throw failure(403,'Human only');return send(res,200,registry.list());}
-  if(route[0]==='doctor'&&method==='GET'){if(scoped)throw failure(403,'Human only');return send(res,200,{...await doctor(url.searchParams.get('project')||undefined),diagnostics:[...orchestrator.diagnostics].map(([project,error])=>({project,...error}))});}
+  if(route[0]==='doctor'&&method==='GET'){if(scoped)throw failure(403,'Human only');return send(res,200,{...await doctor(registry.find(url.searchParams.get('project'))?.root||url.searchParams.get('project')||undefined),diagnostics:[...orchestrator.diagnostics].map(([project,error])=>({project,...error}))});}
   if(route[0]==='service-config'&&route.length===1){if(scoped)throw failure(403,'Human only');return send(res,200,method==='POST'?registry.setConcurrency(body.concurrency):{concurrency:registry.concurrency()});}
   if(route[0]==='storage'&&route.length===1&&method==='GET'){if(scoped)throw failure(403,'Human only');return send(res,200,storageUsage());}
   if(route[0]==='backup'&&route.length===1&&method==='POST'){if(scoped)throw failure(403,'Human only');if(typeof body.destination!=='string')throw failure(400,'Destination required');return send(res,200,createBackup(registry,openProject,body.destination));}

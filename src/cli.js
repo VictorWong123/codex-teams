@@ -30,7 +30,7 @@ try{
  else if(cmd==='init')out(initializeProject(resolve(sub||flags.project||process.cwd())));
  else if(cmd==='doctor'){let root;if(flags.project){let registered;try{registered=JSON.parse(readFileSync(join(DATA_DIR,'registry.json'),'utf8')).projects.find(p=>p.id===flags.project||p.root===flags.project);}catch{}root=registered?.root||resolveProject(process.cwd(),flags.project).root;}out(await doctor(root));}
  else if(cmd==='projects')out(sub==='activate'?await api('/api/projects/'+encodeURIComponent(rest[0])+'/activate',{method:'POST',body:{acknowledge:flags.acknowledge}}):await api('/api/projects'));
- else if(cmd==='handoff'){const value=await get('handoff?goal='+encodeURIComponent(flags.goal));out(value);}
+ else if(cmd==='handoff'){const value=await get('handoff?goal='+encodeURIComponent(flags.goal));if(flags.format==='text'){console.log(`${value.goal.title} — ${value.goal.status}\nBaseline: ${value.baseline?.sha||'unknown'}\n`);for(const w of value.workspaces)console.log(`${w.agent}: ${w.path||'not initialized'} (${w.branch||'root workspace'})`);for(const t of value.tasks)console.log(`${t.status}: ${t.title}`);for(const e of value.evidence)console.log(`${e.kind}: ${e.command||e.id} · exit ${e.exit_code??'n/a'}`);console.log(value.integration);}else out(value);}
  else if(cmd==='storage')out(await api('/api/storage'));
  else if(cmd==='backup')out(await api('/api/backup',{method:'POST',body:{destination:resolve(flags.destination)}}));
  else if(cmd==='restore'){const {restoreBackup}=await import('./backup.js');out(restoreBackup(resolve(flags.source),resolve(flags.destination)));}
@@ -50,7 +50,7 @@ try{
  else if(cmd==='install')out(await install({launchagent:!!flags.launchagent}));
  else if(cmd==='uninstall'){if(await health())await api('/api/shutdown',{method:'POST',body:{}});out(await uninstall());}
  else if(cmd==='self-test'){const {selfTest}=await import('./self-test.js');out(await selfTest({live:args.includes('--live')}));}
- else if(cmd==='status'){do{const value=await get(flags.goal?'summary?goal='+encodeURIComponent(flags.goal):'status');if(flags.format==='text'){const goals=value.goal?[value.goal]:value.goals;for(const g of goals)console.log(`${g.id} ${g.status}: ${g.title} (${g.turn_count}/${JSON.parse(g.config_json).limits.turns} turns)`);}else out(value);if(flags.watch)await new Promise(r=>setTimeout(r,2500));}while(flags.watch);}
+ else if(cmd==='status'){do{const value=await get(flags.goal?'summary?goal='+encodeURIComponent(flags.goal):'status');if(flags.format==='text'){const goals=value.goal?[value.goal]:value.goals;for(const g of goals){const limits=JSON.parse(g.config_json).limits;console.log(`${g.id} ${g.status}: ${g.title} (${g.turn_count}/${limits.turns} turns, ${Math.round(g.active_ms/60000)}/${limits.minutes} active minutes, ${g.token_count}/${limits.tokens??'unlimited'} tokens)`);console.log(value.queueReason||value.queueReasons?.[g.id]||value.blocker||'');}if(value.goal){for(const p of value.participants)console.log(`${JSON.parse(p.snapshot_json).name}: ${p.status} · ${p.workspace||'workspace not initialized'}`);for(const t of value.tasks)console.log(`${t.status}: ${t.title}`);}}else out(value);if(flags.watch)await new Promise(r=>setTimeout(r,2500));}while(flags.watch);}
  else if(cmd==='config')out(sub==='set'?await post('config',{config:input()}):await get('config'));
  else if(cmd==='roster'){
   if(!sub||sub==='list')out((await get('status')).config.agents);

@@ -2,6 +2,7 @@ import {spawnSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
 export const revision=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
 export function sourceBaseline(root,choice) {
+ if(choice!==undefined&&choice!=='HEAD')throw new Error('baseline must be HEAD');
  const run=args=>spawnSync('git',args,{cwd:root,encoding:'utf8'});
  const head=run(['rev-parse','--verify','HEAD']);if(head.status!==0)return {sha:null,dirty:false,accepted:false};
  const status=run(['status','--porcelain']);if(status.status!==0)throw new Error('Unable to inspect Git working tree');

@@ -63,6 +63,9 @@ export function parseArgs(args) {
  if(cmd==='backup'||cmd==='restore')requireFlag('destination');if(cmd==='restore')requireFlag('source');
  if(flags.json&&flags.file)throw new Error('Choose --json or --file');
  if(cmd==='config'&&sub==='set'&&!flags.json&&!flags.file)throw new Error('config set requires --json or --file');
+ if(cmd==='goal'&&sub==='budget'&&!['turns','minutes','tokens'].some(k=>flags[k]!==undefined))throw new Error('Supply a budget increment');
+ for(const key of ['turns','minutes','tokens','limit'])if(flags[key]!==undefined){const value=Number(flags[key]);if(!Number.isFinite(value)||value<=0||key!=='minutes'&&!Number.isSafeInteger(value)||key==='limit'&&value>200)throw new Error(`Invalid --${key} value`);}
+ if(flags.baseline&&flags.baseline!=='HEAD')throw new Error('--baseline must be HEAD');
  if(flags.format&&!['text','json'].includes(flags.format))throw new Error('--format must be text or json');
  if(cmd==='goal'&&sub!=='budget'||cmd==='message') {
   const text=cmd==='goal'?flags.prompt:flags.body, count=[!!text,!!flags['text-file'],!!flags.stdin,!!flags.spec,cmd==='goal'?positional.length>0:positional.length>1].filter(Boolean).length;
