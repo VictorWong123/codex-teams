@@ -1,5 +1,39 @@
 # Release validation — 2026-10-16
 
+## Reliability/usability implementation — 2026-10-28 (unreleased)
+
+Implemented from `main` revision `8039a39`. Portable checks ran on Linux,
+Node 24.19.0, without live model turns or changes to an existing installation.
+
+- Syntax checks passed. The expanded suite passed 80 tests; three pre-existing
+  Codex 0.163.0 configuration integration tests were skipped because the matching
+  executable was unavailable. Actual Chromium dashboard checks passed.
+- New coverage includes CLI request prevention/literal input, dashboard retries,
+  drafts/focus/expansion, stale saves and connection state, project/goal switching,
+  601-record keyset pagination, budget authorization/cap locking, changing Git
+  baselines, round-robin scheduling, note provenance/archive behavior, schema
+  upgrades, task-attempt recovery/deduplication, and silent typecheck validation.
+- Live uncheckpointed WAL backup tests passed. Restores preserve original state,
+  start inactive, reject corrupted or schema-invalid archives, and reconcile
+  ambiguous active turns before project activation.
+- Fresh packed-package installation into an isolated npm prefix passed all nine
+  verifier checks, including the actual MCP handshake with 25 human tools and
+  explicit caller context. The verifier detected zero application Codex
+  invocations and cleaned up its temporary service/state. Package inspection found
+  no runtime state, credentials files, tests, or node_modules in the archive.
+- Full dependency audit reported zero known vulnerabilities. Browser dependencies
+  are development-only; production dependencies remain the MCP SDK and Zod.
+- Read-only security, frontend and test reviews returned fixes to the production
+  implementation owner. Regression fixes cover private health diagnostics,
+  read-only doctor behavior, trusted acceptance caps, canonical restore schema
+  checks, restored-turn recovery, stale config revisions, fail-closed elicitation,
+  cross-project form state, per-goal participants/dependencies, and CLI option scope.
+
+These checks do not establish Mac LaunchAgent behavior, a separate user/account,
+new native-host activation, or new consumer model acceptance. Existing acceptance
+caps were not expanded. Notifications, automatic retention, automatic merges,
+and native cross-chat durability remain outside this update.
+
 Implementation started from exact handoff `2e69034980c79720136db6e9057c7a2c7493d5ca`. This document distinguishes portable Cloud checks from actual consumer Mac/model evidence. The accepted release is v0.1.3: actual Mac live QA exercised `f596621f41966717e53aac558d4acd044c261e3d`; terminal recovery follow-up `85c6fc4480368f8431001dd432a54461becc54b1` passed portable checks and fresh public-archive installation. Its separate Mac terminal-recovery check remains unreported. Tarball checksums and final documentation commit/push evidence are reported with the release in the Cloud chat.
 
 ## Portable/mocked checks

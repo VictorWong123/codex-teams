@@ -1,5 +1,13 @@
 # 0.1.5-rc.1 verification and release candidate
 
+The unreleased reliability/usability branch implements the 19-item backlog and
+selected small extras. Its Linux/Chromium regression and isolated package evidence
+is recorded in `VALIDATION.md`; it does not close the separate host/account gates
+below. Before deploying against important state, make a backup and review the new
+schema, service concurrency migration, and inactive restore workflow in README.
+The human MCP inventory is now 25 tools; clients should refresh discovery after
+upgrading. No new release tag or consumer acceptance run is implied.
+
 This branch prepares the next release; it does not publish a new tag, merge to
 main, or imply that every host/account has been verified. The candidate includes
 the security dependency updates and experimental native chat workflow already

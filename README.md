@@ -1,5 +1,118 @@
 # Codex Teams
 
+## Reliability and usability update (unreleased)
+
+This update adds strict CLI validation, dashboard draft/retry protection, structured
+approvals, filtered/paginated history, goal handoffs, explicit budget extensions,
+pinned isolated-worktree baselines, fair scheduling, reusable specifications,
+editable/archivable notes, and consistent backup/restore. Native chat mode still
+does not promise durable handles across chats. Existing JSON status and notes-list
+output remain supported; new paginated operations are explicit.
+
+```sh
+cteam doctor --project /path/to/project --json
+cteam projects list
+cteam status --goal GOAL_ID --format text --watch
+cteam conversations --page --goal GOAL_ID --limit 50
+cteam conversations --page --goal GOAL_ID --limit 50 --cursor RETURNED_CURSOR
+cteam handoff --goal GOAL_ID
+cteam goal --text-file /path/to/prompt.txt --preview
+cteam goal --stdin --lead developer
+cteam goal --spec 'Bug fix' --preview
+cteam goal --spec 'Bug fix'
+cteam goal budget --goal GOAL_ID --turns 5 --minutes 10
+cteam resume --goal GOAL_ID
+cteam notes edit NOTE_ID --json '{"title":"Updated decision","body":"Current guidance"}'
+cteam notes archive NOTE_ID
+cteam notes unarchive NOTE_ID
+cteam notes list --search guidance
+cteam notes list --page --limit 50
+cteam service config --json '{"concurrency":2}'
+```
+
+`--file` retains its existing JSON meaning; `--text-file` and `--stdin` read literal
+text. Use `--` before literal prompt text that resembles a command or option.
+Unknown flags/subcommands and conflicting prompt sources are errors; help never
+submits work. The unused `--disabled` option is replaced by `roster disable NAME`.
+The dashboard can save specifications and add three starters without replacing
+existing entries. Select read-only participants for the read-only review starter;
+specifications do not silently change participant permissions.
+
+Goal caps are totals: extending them retains consumed usage and requires a separate
+resume. Acceptance-harness goals cannot be extended. Token caps that are already
+unlimited cannot be extended. Global concurrency now lives in service state;
+the first read migrates the minimum valid existing project setting (two for a new
+installation). Project `globalConcurrency` remains readable for compatibility but
+subsequent changes use `service config`; `projectConcurrency` remains effective.
+
+New goals record the Git commit available at creation. Isolated writers always
+start from that commit, even if root HEAD moves later. With dirty/untracked root
+files, use `--baseline HEAD` only after reviewing that isolated worktrees exclude
+those files. The dashboard exposes the same explicit choice. Single writers and
+read-only participants retain their root-workspace behavior. Handoffs identify
+actual workspaces and isolated branches; integration and cleanup remain manual.
+Legacy goals require explicit baseline selection before new isolated workspaces.
+
+New human MCP tools are `team_projects`, `team_doctor`, `team_read`,
+`team_goal_summary`, `team_handoff`, `team_budget`, `team_note_update`, and
+`team_preview`. `team_goal` accepts a named `spec` or a prompt and optional
+`baseline:"HEAD"`. `team_read` returns `{items,nextCursor}` for goals, tasks,
+conversations, messages, evidence, events, or notes. Cursors are bound to the
+project, collection, and filters; reuse the same filters when advancing. Pages
+are live views, not immutable snapshots of concurrently edited records.
+
+Doctor performs read-only local setup/version checks and an HTTP health probe.
+It does not inspect authentication files, launch teams, or repair settings.
+Integration presence is reported separately from transport verification. Review
+the exact Codex compatibility requirement before upgrades; executable paths in
+installed integrations may require an explicit reinstall after moving Node or
+the package. No automatic Codex upgrade is performed.
+
+### Backup, restore, and evidence
+
+```sh
+cteam storage
+cteam backup --destination /absolute/path/to/new-backup-directory
+cteam restore --source /absolute/path/to/backup --destination /absolute/path/to/new-state
+# After stopping the old service, use this same override for all clients:
+CODEX_TEAMS_DATA=/absolute/path/to/new-state cteam service start
+CODEX_TEAMS_DATA=/absolute/path/to/new-state cteam projects list
+# Review original project roots and new-state/restored-configs first:
+CODEX_TEAMS_DATA=/absolute/path/to/new-state cteam projects activate PROJECT_ID --acknowledge
+```
+
+Backup snapshots SQLite WAL state, registry associations, and canonical project
+configuration while service writes are serialized. The destination must be new
+and outside active state. Only a completed manifest marks a usable backup; an
+`INCOMPLETE` directory is not restorable. Restore checks hashes, integrity, schema,
+and project associations, writes to a new state directory, and retains originals.
+Credentials, source files/worktrees, and Codex-managed threads are **not included**.
+Backups contain private conversations, notes, and paths; store them privately.
+
+Restored projects start inactive, with nonterminal goals paused. Activation requires
+the original root configuration to match the saved copy, reconciles ambiguous
+saved turns into recovery review, and expires old approvals. It does not replay
+commands. Review recovery before explicitly resuming goals; restored thread IDs do
+not guarantee Codex still has those threads. Moving source roots to different
+paths is not supported by this restore command.
+
+Database schema upgrades are ordered and transactional. Archived notes remain
+inspectable with revision history but are excluded from newly assembled prompts.
+Recovered command/search evidence is imported only when a durable item/task-attempt
+binding exists; legacy unmatched history stays inspection-only. Recovery never
+auto-verifies tasks or replays ambiguous deliveries.
+
+Tasks now also support `build` and `typecheck` evidence. A captured successful
+`tsc --noEmit`, or a configured `npm|pnpm|yarn|bun run build|typecheck` command,
+can meet its matching requirement. Unsupported, help, dry-run, trivial, and failed
+commands are rejected. Silent typecheck success is valid. These kinds cannot
+satisfy a behavioral-test requirement, and goal-lead verification remains required.
+
+For browser regressions, install development dependencies and provide Chromium at
+`/usr/bin/chromium` or set `CHROMIUM_PATH`. The real-browser test skips when no
+browser is available; DOM-based interaction tests still run. These tests use
+mocked service responses and consume no model turns.
+
 A local MCP server, CLI and dashboard for persistent project teams. Each goal snapshots an editable roster and gives each participating agent an independent durable Codex app-server thread. The goal chooses its lead. Direct messages, owned tasks/dependencies, captured evidence and lead verification coordinate work; idle roster members use no model turns.
 
 **Candidate:** 0.1.5-rc.1 on `qa/cloud-local-release` · **Documentation:** this README and [release checks](RELEASE_CHECKLIST.md) · **License:** [MIT](LICENSE).
