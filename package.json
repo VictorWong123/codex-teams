@@ -1,6 +1,6 @@
 {
   "name": "codex-teams",
-  "version": "0.1.4",
+  "version": "0.1.5-rc.1",
   "type": "module",
   "bin": {
     "cteam": "src/cli.js",
@@ -13,7 +13,8 @@
     "check": "node scripts/check.mjs",
     "install:user": "bash scripts/install.sh",
     "uninstall:user": "bash scripts/uninstall.sh",
-    "self-test": "node src/cli.js self-test"
+    "self-test": "node src/cli.js self-test",
+    "verify:install": "node scripts/verify-install.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.32.1",
@@ -39,7 +40,8 @@
     "protocol/",
     "VALIDATION.md",
     "plugins/",
-    "CLOUD.md"
+    "CLOUD.md",
+    "RELEASE_CHECKLIST.md"
   ],
   "keywords": [
     "codex",

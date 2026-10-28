@@ -6,7 +6,7 @@ import { idSegment } from "./util.js";
 import { api } from "./http-client.js";
 
 const scope={project:must("CODEX_TEAMS_PROJECT"),goal:must("CODEX_TEAMS_GOAL"),agent:must("CODEX_TEAMS_AGENT"),token:must("CODEX_TEAMS_SCOPE_TOKEN")};
-const server=new McpServer({name:"codex-teams-member",version:"0.1.4"});
+const server=new McpServer({name:"codex-teams-member",version:"0.1.5-rc.1"});
 const out=v=>({content:[{type:"text",text:JSON.stringify(v,null,2)}]});
 server.registerTool("team_status",{description:"See this goal's agents, tasks, and your messages",inputSchema:{}},async()=>out(await api(`/api/status?project=${scope.project}`,{scope})));
 server.registerTool("create_task",{description:"Create a shared task with completion criteria",inputSchema:{title:z.string(),description:z.string().default(""),owner:z.string().optional(),depends:z.array(z.string()).default([]),criteria:z.string(),evidenceType:z.enum(["test","research"]).default("test")}},async input=>out(await api("/api/tasks",{method:"POST",scope,body:{...input,project:scope.project}})));

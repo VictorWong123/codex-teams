@@ -102,6 +102,9 @@ Users who choose the local persistent mode should follow [README.md](README.md).
 Do not run both modes for the same goal. Native tasks do not appear in the local
 service dashboard and do not reuse local app-server thread IDs or database goals.
 
+For repeatable package checks and exact fresh-host/Mac/second-account acceptance,
+see [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md).
+
 ## Verification and limits
 
 - Actual Cloud-backed native researcher and builder ran as two separate workers.
