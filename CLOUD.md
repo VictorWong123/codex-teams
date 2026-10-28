@@ -6,12 +6,79 @@ Cloud-backed chat on 2026-10-27. It requires the current chat to expose native
 subagents, messaging, status/wait and interruption, plus a project workspace.
 It is not an authentication workaround or a remotely callable agent API.
 
+## Use it in a Cloud project
+
+Codex Teams and Codex Cloud can be used together in **native chat mode**. Your
+Mac's local service and personal skills do not transfer into the Cloud workspace.
+The persistent app-server runner requires its own supported consumer login;
+managed Cloud authentication is not a substitute. Keep its authentication checks.
+
+From a reviewed, pinned checkout of this repository in the Cloud filesystem:
+
+```sh
+node scripts/setup-cloud.mjs
+```
+
+This dependency-free, offline command installs the native workflow at user scope
+on that machine. It needs Node >=22.22, but no `npm ci`, Codex binary, login, API
+key, MCP registration, daemon, or public port. Repeating the same setup is safe;
+different existing instructions and symlink destinations are refused. To install
+only for a particular project, including a project without a team registry:
+
+```sh
+node scripts/setup-cloud.mjs --scope project --project /absolute/path/to/project
+```
+
+The output distinguishes `installation: current` from `capability: check-in-chat`.
+The latter must be checked by the chat, using its actual tools. Once the CLI's
+dependencies are installed, check the same files without modifying anything:
+
+```sh
+cteam native status --scope user
+cteam native status --scope project --project /absolute/path/to/project
+```
+
+Status reports `missing`, `current`, `different`, or `unsafe-path`; it does not
+claim a service is running, inspect credentials, or infer host entitlements.
+Ask the Cloud chat to read the installed skill and use `codex-teams-native` for
+your goal. It checks tools first and reports UNSUPPORTED if they are absent.
+
+This repository also contains `.agents/skills/codex-teams/SKILL.md` so chats in
+the checkout can discover how to choose native or persistent execution. The same
+instructions replace the old local-only usage skill when `cteam install` is run
+on a user-managed machine. Native setup itself does not modify that machine's
+existing local integration. Do not run `cteam install` to set up managed Cloud.
+
+For future Cloud tasks, include the pinned checkout and setup command in the
+environment's supported setup workflow, then republish and verify a fresh task.
+Alternatively, install at project scope and commit that project's generated
+skill after review. A task-local installation does not update the published
+environment. [Cloud documentation](https://learn.chatgpt.com/docs/environments/cloud-environments)
+confirms repository skills are available in Cloud and personal Mac skills are
+not synced. Keep private repository access private; do not embed clone tokens.
+
+## Does this provide an autonomous 24/7 lab?
+
+No. Native teams execute a bounded goal inside an active Cloud task, which can
+continue while your computer sleeps. Finishing that goal does not start the next
+research cycle, and saved filesystem state is not a running process. A skill
+cannot guarantee continuous execution, restore native agent handles in a new
+chat, or bypass usage limits.
+
+An ongoing lab additionally needs a supported scheduler/awake host, durable
+research backlog and checkpoints, explicit bounded cycles, interruption and
+usage-limit handling, and a stop control. A user-managed server can host the
+persistent runner with a supported consumer-owned ChatGPT login; that is separate
+from managed Codex Cloud. No server, paid hosting, infinite restart loop or
+automatic usage-reset retry is provisioned by this setup. Choose and verify that
+hosting arrangement before promising unattended operation.
+
 ## Choose an execution mode
 
 | Choice | Execution owner | Requirements | Lifecycle |
 | --- | --- | --- | --- |
 | Native chat | The active host chat coordinates its native subagents | Eligible host/account, subagent tools, workspace, explicit team request | Active task only; no daemon or guaranteed cross-chat thread recovery |
-| Local persistent | Existing `cteam` service and Codex app-server | Node >=22.22, Codex 0.163.0, consumer-owned ChatGPT login | Existing durable goals, CLI/MCP/dashboard and local service |
+| Persistent on a user-managed host | Existing `cteam` service and Codex app-server | Awake local/remote host, Node >=22.22, Codex 0.163.0, consumer-owned ChatGPT login | Existing durable goals, CLI/MCP/dashboard; Linux boot supervision is not included |
 
 Native mode supports arbitrary project paths and user-defined roles. It does
 not promise compatibility with every account, project permission, operating
@@ -106,6 +173,29 @@ For repeatable package checks and exact fresh-host/Mac/second-account acceptance
 see [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md).
 
 ## Verification and limits
+
+Cloud setup verification on 2026-10-28:
+
+- All 59 automated tests passed on Node 24.19.0 with Codex 0.163.0, zero skips;
+  syntax checks and the dependency audit passed (zero known advisories).
+- The setup command installed the native skill in the current Cloud user's
+  filesystem. Codex 0.163.0's real `skills/list` found the repository routing skill
+  and user native skill enabled, with no discovery errors and no model turn.
+- Two native Cloud reviewers explicitly read that installed workflow and reviewed
+  this change. The test reviewer sent package evidence directly to the security
+  reviewer. Both completed within the bounded review; neither changed production
+  files, and neither reported an actionable issue. The coordinator independently
+  ran the suite and inspected the diff.
+- Independent archive checks passed in a disposable project with no dependencies,
+  empty PATH and no Codex executable: offline bootstrap, private file permissions,
+  idempotence, edited-file preservation, scope/argument rejection, symlink refusal
+  and read-only status. These checks launch no nested Codex model processes.
+- This establishes explicit use in another Cloud chat and actual CLI filesystem
+  discovery, not automatic hosted-plugin ingestion, a second account, a Mac
+  installation, a published environment update, or continuous 24/7 execution.
+  Native reviewer role prompts were not separate enforced read-only sandboxes.
+
+Earlier native workflow acceptance:
 
 - Actual Cloud-backed native researcher and builder ran as two separate workers.
   Research identified four defects in a disposable slugify fixture and directly
