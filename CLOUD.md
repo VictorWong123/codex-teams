@@ -73,6 +73,45 @@ from managed Codex Cloud. No server, paid hosting, infinite restart loop or
 automatic usage-reset retry is provisioned by this setup. Choose and verify that
 hosting arrangement before promising unattended operation.
 
+## Keep the team working on a shared backlog
+
+Native mode uses a coordinator-managed task queue. Workers communicate directly,
+report findings and blockers, and request more work. When any worker finishes,
+the coordinator checks its result and gives it the next ready assignment while
+other workers continue. It does not wait for every agent to finish the current
+group. Existing worker handles are reused through the host's follow-up tool;
+messaging an idle agent alone may not start another turn.
+
+For example, a builder can implement one task while a researcher investigates
+the next issue and a reviewer prepares acceptance cases. Tasks with unfinished
+dependencies wait, and each task has one owner. Agents with no useful ready task
+remain idle with a stated reason. All required work must be verified before the
+goal is complete. Concurrency and the original finite run budget still apply.
+Assignment/correction caps prevent additional dispatches; already-authorized work
+can finish within the original elapsed-time deadline. Reaching that deadline or
+a user stop interrupts the owned workers and preserves unfinished tasks.
+
+If you request GitHub work, a backlog/delivery agent can search existing issues,
+file concrete in-scope findings with acceptance criteria, and open or update
+tested draft PRs in the authorized repository. The coordinator assigns the
+resulting work once, with dependencies and issue links. This uses the host's
+existing GitHub access; the native plugin grants none. Ambiguous writes are
+reconciled before retrying, and open PRs remain awaiting review. Merging, deploying
+and changing repository access require their own applicable authorization.
+
+Example request:
+
+> Use native codex-teams for this repository. Work through the specified research
+> backlog, keep agents assigned to ready tasks, and have them share findings
+> directly. Reassign finished agents while others continue. File deduplicated
+> issues for concrete findings and open tested draft PRs for completed changes.
+> Use at most six worker assignments and ten minutes for this cycle; checkpoint
+> remaining work and blockers at the limit.
+
+This is orchestration by the active chat following the installed skill, not a
+background scheduler or a hard service-enforced queue. The persistent runner has
+its separate task/message scheduler; native tasks do not share its database.
+
 ## Choose an execution mode
 
 | Choice | Execution owner | Requirements | Lifecycle |
@@ -190,6 +229,15 @@ Cloud setup verification on 2026-10-28:
   empty PATH and no Codex executable: offline bootstrap, private file permissions,
   idempotence, edited-file preservation, scope/argument rejection, symlink refusal
   and read-only status. These checks launch no nested Codex model processes.
+- The shared-backlog follow-up used four assignments across two native workers.
+  After the package checker completed, the coordinator assigned it another ready
+  task on the same handle while the security reviewer was still running. Direct
+  peer messages identified an ambiguous count-cap interruption rule; the owner
+  corrected it and review confirmed the final allowed tasks can finish within
+  the original deadline. Final installed and packaged skills matched source.
+  This exercised task handoffs and correction review, not autonomous GitHub issue
+  creation or continuous scheduling. GitHub backlog behavior remains skill guidance
+  executed through the host's authorized tools.
 - This establishes explicit use in another Cloud chat and actual CLI filesystem
   discovery, not automatic hosted-plugin ingestion, a second account, a Mac
   installation, a published environment update, or continuous 24/7 execution.

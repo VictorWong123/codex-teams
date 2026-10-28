@@ -22,6 +22,9 @@ Check actual spawn, messaging/follow-up, wait/status and interruption tools and 
 usable project workspace. Missing capabilities mean UNSUPPORTED. A CLI status
 report or installed skill cannot establish native tool availability. Follow the
 native workflow's finite budgets, single writer, evidence checks and cleanup.
+Keep its ready-task queue moving: give idle workers another authorized ready task
+without waiting for all peers to finish. The workflow also covers user-requested
+GitHub issue backlogs and tested draft PRs; creating backlog does not extend a run.
 
 No service, MCP registration, separate login, API key or nested Codex app-server
 is needed for native mode. Never copy credentials, change managed authentication,
