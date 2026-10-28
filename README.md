@@ -2,19 +2,26 @@
 
 A local MCP server, CLI and dashboard for persistent project teams. Each goal snapshots an editable roster and gives each participating agent an independent durable Codex app-server thread. The goal chooses its lead. Direct messages, owned tasks/dependencies, captured evidence and lead verification coordinate work; idle roster members use no model turns.
 
-**Download:** [v0.1.4 source package](https://github.com/VictorWong123/codex-teams/archive/refs/tags/v0.1.4.tar.gz) · **Documentation:** this public README · **License:** [MIT](LICENSE).
+**Candidate:** 0.1.5-rc.1 on `qa/cloud-local-release` · **Documentation:** this README and [release checks](RELEASE_CHECKLIST.md) · **License:** [MIT](LICENSE).
 
-Free, open-source software that runs on your own computer. Model work requires your own supported Codex ChatGPT account; this project does not provide free model usage or a hosted shared account. The npm registry package named `codex-teams` is a different distribution: use the exact GitHub URL below.
+This is an unreleased verification candidate. It includes the security fixes and
+native workflow merged to main. No 0.1.5 tag or hosted-plugin listing is published.
+The old v0.1.4 archive still contains dependencies flagged by the later audit;
+use the reviewed candidate source when testing these changes. The npm registry
+name `codex-teams` belongs to a different distribution.
 
-| Platform | Status |
+| Platform/mode | Status |
 | --- | --- |
-| macOS | Installed v0.1.3 CLI, dashboard, LaunchAgent controls and real ChatGPT workflow passed recorded Mac acceptance. v0.1.4 retains that implementation; this release was checked on Linux. |
-| Linux | Portable tests, clean package installation, MCP and local service checked. No system boot integration. |
-| Windows | **Coming soon.** Installation and service behavior are not validated or supported yet. |
+| Local macOS runner | Historical live acceptance passed; this candidate's Mac installation/service checks are pending |
+| Linux portable runner | Automated and isolated package checks run here; no system boot integration |
+| Native Cloud/local chat | Experimental; build/correction/failure/cancellation exercised in the existing Cloud chat; fresh-host and second-account checks pending |
+| Windows | Unsupported/unvalidated |
 
-**Security update (2026-10-27, unreleased):** A fresh audit of the v0.1.4 lockfile found advisories in Zod, body-parser and fast-uri. This branch updates them to 4.6.7, 2.4.0 and 3.1.9, respectively, with 51 passing tests and zero current audit findings. The versioned v0.1.4 download above remains unchanged and does not contain this update. See [validation](VALIDATION.md#security-maintenance--2026-10-27) for verification and limitations.
-
-**Release status:** v0.1.4 updates release metadata, public installation instructions and platform guidance. All 50 portable/security tests pass with Codex 0.163.0; the dependency audit reports no known vulnerabilities. Previously recorded Mac acceptance used 4 model turns in 156.17 seconds for the successful v0.1.3 QA run. No new live model run or Mac test is claimed for v0.1.4. See [validation](VALIDATION.md) for exact revisions, aggregate acceptance limits and pending sleep/wake checks.
+The dependency updates remove the advisories found in the older lockfile. A clean
+audit is not a guarantee of absence of vulnerabilities. See [validation](VALIDATION.md)
+and [the release checklist](RELEASE_CHECKLIST.md) for exact boundaries. Model work
+requires the user's own eligible host/account; the project supplies no shared
+account or free model entitlement.
 
 The primary command is **`cteam`**. **`codex-teams`** remains a compatible alias. The package/repository, MCP entry/tool names, configuration and environment variables retain their existing Codex Teams names.
 
@@ -32,11 +39,11 @@ The v0.1.4 download above does not contain this feature.
 
 Requires Node **22.22.0 or later**, npm and **Codex CLI exactly 0.163.0**. Node's built-in SQLite may display an experimental warning on Node 22. Existing Codex-managed **ChatGPT login** is required only for model work. There is no API-key/provider fallback, shared account, token copying or credit purchase.
 
-Install the free public release through its versioned HTTPS tag archive (avoids local Git SSH URL rewrites):
+Build the candidate with `npm ci && npm pack` from this branch. Run `npm run verify:install` before changing an existing installation. For a reviewed local installation:
 
 ```sh
 npm install -g @openai/codex@0.163.0
-npm install -g https://github.com/VictorWong123/codex-teams/archive/refs/tags/v0.1.4.tar.gz
+npm install -g /absolute/path/to/codex-teams-0.1.5-rc.1.tgz
 codex --version                 # codex-cli 0.163.0
 codex login status              # reuse your own existing ChatGPT login
 cteam install             # backs up Codex config; adds one MCP + usage skill
@@ -48,7 +55,7 @@ The dashboard is optional: run `cteam dashboard` only if you want the browser vi
 
 Credential-free public HTTPS installation, clean-prefix CLI/MCP/dashboard checks and package audits passed. Live Mac acceptance exercised `f596621f41966717e53aac558d4acd044c261e3d`; terminal recovery follow-up `85c6fc4480368f8431001dd432a54461becc54b1` additionally passed the full portable suite and fresh public-archive installation. Existing release tags remain unchanged. See `VALIDATION.md` for artifact/checksum and test boundaries.
 
-Alternatively install the release tarball with `npm install -g /path/to/codex-teams-0.1.4.tgz`. From a checkout: `npm ci && npm pack`, then globally install that tarball. The npm registry name `codex-teams` is occupied; do not install the bare package name. This project is distributed directly from its public GitHub archive. Restart Codex after adding the MCP entry/skill. Existing settings and unrelated MCP entries are preserved; either conflicting CLI alias (`cteam` or `codex-teams`) or an unrelated MCP entry named `codex-teams` cause installation to refuse before modifying configuration. Supported Codex registration is validated in a private staging config; only the owned MCP table is merged into the original text, preserving unrelated empty arrays/comments. Concurrent config edits detected before commit cause a safe retry.
+Alternatively install the release tarball with `npm install -g /path/to/codex-teams-0.1.5-rc.1.tgz`. From a checkout: `npm ci && npm pack`, then globally install that tarball. The npm registry name `codex-teams` is occupied; do not install the bare package name. The candidate is built from its source branch; use immutable release archives once a final version is published. Restart Codex after adding the MCP entry/skill. Existing settings and unrelated MCP entries are preserved; either conflicting CLI alias (`cteam` or `codex-teams`) or an unrelated MCP entry named `codex-teams` cause installation to refuse before modifying configuration. Supported Codex registration is validated in a private staging config; only the owned MCP table is merged into the original text, preserving unrelated empty arrays/comments. Concurrent config edits detected before commit cause a safe retry.
 
 For macOS background startup, after the portable steps run:
 

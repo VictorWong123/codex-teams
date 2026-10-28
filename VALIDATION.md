@@ -138,3 +138,15 @@ A packed installation in a fresh local prefix passed CLI help/init, detached ser
 The updated Cloud network policy permits chatgpt.com and the Codex endpoint responds through the proxy. Live self-test still returns PENDING before model dispatch because platform-managed Cloud authentication is not consumer-owned authentication. The isolated auth probe also returns PENDING as expected. No credentials were copied, restrictions bypassed or API fallback used. Earlier recorded Mac acceptance remains separate historical evidence; no new live acceptance is claimed.
 
 The GitHub repository is public and already supplies MIT licensing and first-party README/SECURITY/PROTOCOL documentation. This maintenance branch does not change existing release tags or publish a new release.
+
+## 0.1.5-rc.1 verification candidate
+
+Prepared on `qa/cloud-local-release`, based on merged main `aa014dc3d895b19484242e71cf43edaf5c4bb5b4`. No final release tag, main merge or hosted-plugin publication is part of this candidate.
+
+All 56 tests passed with zero skips on Linux under Node 22.22.1 and 24.19.0, with matching Codex 0.163.0 for the existing auth-free protocol/config tests. Syntax checks passed. npm audit reported zero known vulnerabilities. The portable verifier regression additionally proves original-state preservation and handles symlinked temporary paths, which previously caused false failures and matter for macOS portability.
+
+A clean npm-prefix installation of the candidate tarball passed `cteam verify-install`: invocation detector self-test, CLI/version, isolated initialization, native skill installation/idempotence in two projects, loopback service, 401/403 rejection, dashboard/CSP, actual MCP handshake/version/17 tools/context isolation, no application invocation of Codex and cleanup. It consumed zero model turns. Package allowlist inspection found no matched runtime/credential-state paths. These are bounded checks, not proof of absence of all secrets or security defects. Final targeted source review found no actionable issue after temporary-path and timeout fixes.
+
+Native lifecycle probes in the current host chat used two bounded assignments: one worker ran an intentional exit-23 command and accurately returned FAILED without retry; another signaled readiness and was interrupted, after which the native host listed it as interrupted. No subsequent assignment was dispatched after that probe budget. This verifies explicit failure reporting and observed interruption; it does not simulate a model crash, establish hard budget enforcement or prove cross-chat recovery.
+
+Actual new-host plugin activation, Mac installer/LaunchAgent behavior and a second account remain PENDING. The candidate provides `RELEASE_CHECKLIST.md` with exact commands/prompts and evidence boundaries so those checks can be run without sharing authentication. Native mode remains experimental; no broader account entitlement or persistent background behavior is claimed. Historical local live acceptance and the disposable Cloud to-do acceptance remain separate evidence.
