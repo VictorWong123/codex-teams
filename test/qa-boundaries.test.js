@@ -37,7 +37,7 @@ test('actual MCP SDK binds caller context, task scope and UUIDs and supports par
  const f=await fixture(),a=f.a.store(),b=f.b.store(),goal=a.createGoal('Caller goal'),other=b.createGoal('Daemon goal'),stopped=a.createGoal('Stopped goal');a.db.prepare("UPDATE goals SET status='stopped' WHERE id=?").run(stopped.id);
  const client=new Client({name:'qa-boundary-regression',version:'1.0.0'}),transport=new StdioClientTransport({command:process.execPath,args:[resolve('src/mcp.js')],cwd:f.daemon,env:{...process.env,CODEX_TEAMS_PORT:String(f.port)},stderr:'pipe'});
  try{
-  await client.connect(transport);assert.equal((await client.listTools()).tools.length,17);
+  await client.connect(transport);assert.equal((await client.listTools()).tools.length,25);
   const call=(name,args)=>client.callTool({name,arguments:{cwd:f.caller,project:'sub',...args}});
   const status=toolValue(await call('team_status',{}));assert.equal(status.project.root,f.a.root);
   assertToolError(await client.callTool({name:'team_status',arguments:{project:'sub'}}));

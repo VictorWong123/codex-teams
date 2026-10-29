@@ -1,5 +1,40 @@
 # Codex Teams improvement backlog
 
+## Implementation status — 2026-10-28
+
+All 19 numbered items are integrated on `main`, together
+with reviewed worktree handoff, supported-version upgrade guidance, and three
+opt-in starter specifications. The investigation below remains as historical
+rationale; its line references and original QA checkpoint are not current.
+
+| Items | Delivered behavior | Regression evidence |
+| --- | --- | --- |
+| 1 | Strict command/subcommand options, literal text, safe help | CLI parser and existing installed CLI checks |
+| 2–3, 16 | Pending/retry safeguards, stable drafts/focus/details, scoped accessible actions | DOM interaction and actual Chromium tests |
+| 4 | Read-only doctor and categorized authenticated diagnostics | Read-only configuration test, existing no-model installation verifier |
+| 5 | Recorded SHA, explicit dirty-root exclusions, stable isolated worktrees | Disposable Git changing-HEAD regression |
+| 6 | Audited positive budget extensions, separate resume, locked acceptance caps | Usage/status preservation and authorization tests |
+| 7 | Method-specific approvals; unsupported elicitation forms fail closed | Approval subset/schema tests and browser controls |
+| 8 | Durable item/task-attempt bindings and deduplicated recovery ingestion | Captured/replayed item and stale-attempt tests |
+| 9–11 | Selected-goal progress/handoff, cursor history, attention/stale state | 601-record paging, project-switch, focus and disconnection tests |
+| 12–13 | Project discovery, literal multiline input, specifications and preview | Parser, preview, MCP inventory/context checks |
+| 14–15 | Note revisions/archive/search, basic settings, dependency selectors, stale-save rejection | Provenance/prompt and stale-configuration tests |
+| 17 | Storage reporting, consistent backup, validated inactive restore | Live WAL, corrupt/schema-invalid archive, restored activation tests |
+| 18 | Separate build/typecheck requirements, including silent typechecks | Runner rejection and successful silent validation tests |
+| 19 | Persisted service concurrency and round-robin dispatch | Deterministic project/goal fairness regression |
+
+Compatibility: existing JSON status and notes-list responses remain available.
+New paginated reads are opt-in for CLI/MCP; dashboard history uses bounded pages.
+Legacy recovery items without reliable attribution are inspection-only. Backups
+exclude credential files and source workspaces; they still contain private user
+data. Restored original roots must be reviewed before activation.
+
+The historical v0.1.3 installed-Mac checkpoint is complete. The current candidate's
+separate Mac, fresh-host/account and publication checks remain pending; see
+`RELEASE_CHECKLIST.md`. No new live model acceptance budget was consumed.
+Notifications, automatic retention, automatic integration/cleanup, and native
+cross-chat durability remain deferred.
+
 Prepared 2026-10-27 from local source revision `f596621f41966717e53aac558d4acd044c261e3d`.
 
 ## Scope and confidence

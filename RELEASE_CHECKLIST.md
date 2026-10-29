@@ -1,7 +1,16 @@
 # 0.1.5-rc.1 verification and release candidate
 
-This branch prepares the next release; it does not publish a new tag, merge to
-main, or imply that every host/account has been verified. The candidate includes
+The unreleased candidate on `main` integrates native Cloud setup, the 19-item
+reliability/usability backlog and selected additional improvements.
+Its Linux/Chromium regression and isolated package evidence
+is recorded in `VALIDATION.md`; it does not close the separate host/account gates
+below. Before deploying against important state, make a backup and review the new
+schema, service concurrency migration, and inactive restore workflow in README.
+The human MCP inventory is now 25 tools; clients should refresh discovery after
+upgrading. No new release tag or consumer acceptance run is implied.
+
+Merging this candidate into `main` does not publish a new release tag or imply
+that every host/account has been verified. The candidate includes
 the security dependency updates and experimental native chat workflow already
 merged to main. Existing v0.1.4 archives remain unchanged.
 
@@ -36,24 +45,25 @@ requires Node >=22.22 and the package dependencies. Windows remains unsupported.
 
 | Check | Result and scope |
 | --- | --- |
-| Automated regressions | 56 tests passed with zero skips on Linux, Node 22.22.1 and 24.19.0 |
+| Automated regressions | 101 passed, zero skips on Node 24.19.0 / Codex 0.163.0, including actual Chromium; see the combined PR #4/#5 verification in VALIDATION.md |
 | Native fresh-project build | Prior disposable to-do app passed 11 unit tests and 19 Chromium groups, including a review/correction loop; app was deleted |
 | Native worker failure | Actual worker ran an intentional exit-23 command and reported FAILED without repair/retry; this does not simulate a model crash |
 | Native cancellation | Actual running worker was interrupted; host agent listing reported interrupted |
-| Native assignment budget | Coordinator stopped at its two-assignment probe budget; this is instruction-managed, not hard server enforcement |
+| Native assignment budget | Four-assignment native handoff/review run completed; count caps stop new dispatch and the elapsed deadline stops active work; instruction-managed |
 | Reuse after chat end | Not verified; native mode explicitly does not promise durable cross-chat handles |
-| Fresh package installation | Candidate verifier and clean-prefix package check; scoped to this Linux executor |
-| Fresh Cloud environment and hosted activation | PENDING: must be a new host chat/environment, not another folder or subagent |
+| Fresh package installation | Nine verifier checks passed from a fresh tarball and clean prefix, including 25-tool MCP handshake and cleanup; scoped to this Linux executor |
+| Fresh Cloud environment and hosted activation | Filesystem discovery and explicit use in another Cloud chat passed; fresh published-environment/hosted-plugin activation remains PENDING |
 | Actual Mac | PENDING: Linux and mocked LaunchAgent checks do not prove macOS behavior |
 | Separate user/account | PENDING: synthetic directories/profiles do not count as another account |
-| Public plugin listing and final release | PENDING: not published by this branch |
+| Public plugin listing and final release | PENDING: merging main does not publish either |
 
 ## Fresh Cloud acceptance
 
 Use the normal environment setup UI to attach the source repository and install
 the exact candidate revision. Keep normal managed permissions, networking and
 credentials. Do not copy a local auth file or bypass the local runner's guard.
-Run the installation verifier first and save its JSON report outside the
+Run `node scripts/setup-cloud.mjs` to install the native instructions in that
+environment. Run the installation verifier and save its JSON report outside the
 candidate checkout. Start a **new chat** on that environment. Do not fork this
 chat's accumulated setup as proof of discovery.
 
@@ -117,8 +127,8 @@ this package. Keep each user's credentials and project data separate.
    audit. Confirm no credential/runtime-state files enter the tarball/plugin ZIP.
 2. Obtain actual fresh-host and Mac reports, or explicitly keep affected modes
    experimental/unsupported. Do not turn a pending item into a pass.
-3. Review the candidate diff, then merge the branch only when authorized. Choose
-   a final version and update runtime identifiers/docs consistently.
+3. The reviewed PRs are integrated on `main`; choose a final release version and
+   update runtime identifiers/docs consistently when release publication is authorized.
 4. Publish an immutable version tag and release archive after verifying its
    exact source. Do not move old tags. Do not publish under the unrelated npm
    registry package name `codex-teams`.

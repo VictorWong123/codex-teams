@@ -213,6 +213,10 @@ see [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md).
 
 ## Verification and limits
 
+For the current combined native/persistent candidate checks, see
+[the validation record](VALIDATION.md). The results below describe the earlier
+Cloud-specific setup and workflow checks.
+
 Cloud setup verification on 2026-10-28:
 
 - All 59 automated tests passed on Node 24.19.0 with Codex 0.163.0, zero skips;
