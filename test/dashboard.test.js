@@ -11,6 +11,34 @@ function fixture(){
  w.fetch=async(url,opts)=>{calls.push({url,...opts});const value=opts.method==='POST'?await post(JSON.parse(opts.body)):get?get(url):url.includes('/projects')?[{id:'p',root:'/project'}]:url.includes('/read/')?{items:[],nextCursor:null}:state;return {ok:true,json:async()=>value};};w.eval(script);
  return {w,state,calls,poll:()=>interval(),setPost:fn=>post=fn,setGet:fn=>get=fn,close:()=>w.close()};
 }
+test('a delayed old-project summary cannot replace cards or send actions to the new project',async()=>{
+ const f=fixture();try{
+  let hold=false,held=false,release,entered;const waiting=new Promise(r=>entered=r);
+  f.setGet(url=>{
+   const id=new URL(url,'http://localhost').searchParams.get('project'),label=id==='other'?'B':'A',agent=label.toLowerCase()+'-agent',goal={id:label+'-goal',title:label,status:'paused',lead_agent_id:agent,config_json:'{"limits":{}}'};
+   if(url.includes('/projects'))return [{id:'p',root:'/A'},{id:'other',root:'/B'}];
+   if(url.includes('/read/'))return {items:url.includes('/read/goals')?[goal]:[],nextCursor:null};
+   if(url.includes('/summary')){const value={participants:[],tasks:[],approvals:[]};if(hold&&!held&&id==='p'){held=true;entered();return new Promise(r=>release=()=>r(value));}return value;}
+   return {...structuredClone(f.state),project:{name:label},config:{...f.state.config,agents:[{id:agent,name:label+' agent',enabled:true}]},approvals:[]};
+  });
+  await flush();const oldDisable=[...f.w.document.querySelectorAll('#agents button')].find(b=>b.textContent==='Disable');hold=true;f.poll();await waiting;const selector=f.w.document.getElementById('project');selector.value='other';selector.dispatchEvent(new f.w.Event('change'));await flush();
+  assert.equal(f.w.document.querySelector('#agents h3').textContent,'B agent');oldDisable.click();await flush();assert.equal(f.calls.filter(c=>c.method==='POST').length,0);release();await flush();assert.equal(f.w.document.querySelector('#agents h3').textContent,'B agent');
+  [...f.w.document.querySelectorAll('#agents button')].find(b=>b.textContent==='Disable').click();await flush();const post=JSON.parse(f.calls.find(c=>c.method==='POST').body);assert.equal(post.project,'other');assert.equal(post.agent.id,'b-agent');
+ }finally{f.close();}
+});
+test('a delayed summary cannot hide approvals after selecting a different goal in the same project',async()=>{
+ const f=fixture();try{
+  const goals=['one','two'].map(id=>({id,title:id,status:'paused',lead_agent_id:'a',config_json:'{"limits":{}}'}));let hold=false,held=false,release,entered;const waiting=new Promise(r=>entered=r);
+  f.setGet(url=>{
+   if(url.includes('/projects'))return [{id:'p',root:'/A'}];
+   if(url.includes('/read/'))return {items:url.includes('/read/goals')?goals:[],nextCursor:null};
+   if(url.includes('/summary')){const goal=new URL(url,'http://localhost').searchParams.get('goal'),value={participants:[],tasks:[],approvals:[{id:goal,goal_id:goal,agent_id:'a',method:'item/tool/requestUserInput',params_json:JSON.stringify({questions:[{id:'q',question:'Question '+goal}]})}]};if(hold&&!held&&goal==='one'){held=true;entered();return new Promise(r=>release=()=>r(value));}return value;}
+   return structuredClone(f.state);
+  });
+  await flush();const selector=f.w.document.getElementById('selected-goal');selector.value='one';selector.dispatchEvent(new f.w.Event('change'));await flush();hold=true;f.poll();await waiting;selector.value='two';selector.dispatchEvent(new f.w.Event('change'));await flush();assert.match(f.w.document.getElementById('approvals').textContent,/Question two/);
+  release();await flush();assert.equal(selector.value,'two');assert.match(f.w.document.getElementById('approvals').textContent,/Question two/);
+ }finally{f.close();}
+});
 test('dashboard suppresses repeated clicks and retains submission key after ambiguous failure',async()=>{
  const f=fixture();try{await flush();const form=f.w.document.getElementById('goal-form');f.w.document.getElementById('goal-prompt').value='Build';let reject;f.setPost(()=>new Promise((_,r)=>reject=r));form.dispatchEvent(new f.w.Event('submit',{cancelable:true}));form.dispatchEvent(new f.w.Event('submit',{cancelable:true}));await flush();assert.equal(f.calls.filter(c=>c.method==='POST').length,1);reject(new Error('lost response'));await flush();f.setPost(async()=>({}));form.dispatchEvent(new f.w.Event('submit',{cancelable:true}));await flush();const posts=f.calls.filter(c=>c.method==='POST').map(c=>JSON.parse(c.body));assert.equal(posts[0].idempotencyKey,posts[1].idempotencyKey);assert.equal(f.w.document.getElementById('goal-prompt').value,'');}finally{f.close();}
 });

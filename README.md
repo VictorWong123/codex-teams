@@ -1,6 +1,97 @@
 # Codex Teams
 
-## Reliability and usability update (unreleased)
+Codex Teams supports native teams inside an eligible Cloud/local chat and a separate persistent runner with a CLI, MCP server and dashboard. In the persistent runner, each goal snapshots an editable roster and gives each participating agent an independent durable Codex app-server thread. The goal chooses its lead. Direct messages, owned tasks/dependencies, captured evidence and lead verification coordinate work; idle roster members use no model turns.
+
+**Candidate:** 0.1.5-rc.1 on `main` · **Documentation:** this README and [release checks](RELEASE_CHECKLIST.md) · **License:** [MIT](LICENSE).
+
+This is an unreleased verification candidate. It includes the security fixes,
+native workflow and reliability improvements integrated on main. No 0.1.5 tag or
+hosted-plugin listing is published.
+The old v0.1.4 archive still contains dependencies flagged by the later audit;
+use the reviewed candidate source when testing these changes. The npm registry
+name `codex-teams` belongs to a different distribution.
+
+| Platform/mode | Status |
+| --- | --- |
+| Local macOS runner | Historical live acceptance passed; this candidate's Mac installation/service checks are pending |
+| Linux portable runner | Automated and isolated package checks run here; no system boot integration |
+| Native Cloud/local chat | Experimental; build/correction/failure/cancellation exercised in the existing Cloud chat; fresh-host and second-account checks pending |
+| Windows | Unsupported/unvalidated |
+
+The dependency updates remove the advisories found in the older lockfile. A clean
+audit is not a guarantee of absence of vulnerabilities. See [validation](VALIDATION.md)
+and [the release checklist](RELEASE_CHECKLIST.md) for exact boundaries. Model work
+requires the user's own eligible host/account; the project supplies no shared
+account or free model entitlement.
+
+The primary command is **`cteam`**. **`codex-teams`** remains a compatible alias. The package/repository, MCP entry/tool names, configuration and environment variables retain their existing Codex Teams names.
+
+## Cloud or native chat teams (experimental, unreleased)
+
+A separate [native chat workflow](CLOUD.md) uses the active chat's own subagents
+in eligible Cloud or local hosts. A real Cloud researcher-to-builder correction
+passed 20 tests plus independent lead assertions. The new `cteam native install`
+command installs reusable instructions; it does not launch agents or grant host
+capabilities. The local persistent runner below remains a separate choice.
+Hosted plugin installation and multi-account availability are not yet verified.
+The old v0.1.4 release does not contain this feature.
+
+To set up native mode from a reviewed checkout **in the Cloud environment**:
+
+```sh
+node scripts/setup-cloud.mjs
+```
+
+Then ask the Cloud chat to read the installed `codex-teams-native` skill and use
+it for your goal. This setup needs no npm dependencies or separate Codex login.
+It reports instruction installation separately from the native tools the chat
+must verify. Mac-installed personal skills do not sync into Cloud. See
+[Cloud setup, project scope and 24/7 limits](CLOUD.md). Native mode runs within an
+active task; an always-running research lab needs separate scheduling and hosting.
+
+## Install the persistent runner
+
+Requires Node **22.22.0 or later**, npm and **Codex CLI exactly 0.163.0**. Node's built-in SQLite may display an experimental warning on Node 22. Existing Codex-managed **ChatGPT login** is required only for model work. There is no API-key/provider fallback, shared account, token copying or credit purchase.
+
+Build the candidate with `npm ci && npm pack` from this checkout. Run `npm run verify:install` before changing an existing installation. For a reviewed local installation:
+
+```sh
+npm install -g @openai/codex@0.163.0
+npm install -g /absolute/path/to/codex-teams-0.1.5-rc.1.tgz
+codex --version                 # codex-cli 0.163.0
+codex login status              # reuse your own existing ChatGPT login
+cteam install             # backs up Codex config; adds one MCP + usage skill
+cteam service start
+cteam init /absolute/path/to/project
+```
+
+The dashboard is optional: run `cteam dashboard` only if you want the browser view. If you are not already logged in, use `codex login` with your own supported ChatGPT account before requesting model work.
+
+Credential-free public HTTPS installation, clean-prefix CLI/MCP/dashboard checks and package audits passed. Live Mac acceptance exercised `f596621f41966717e53aac558d4acd044c261e3d`; terminal recovery follow-up `85c6fc4480368f8431001dd432a54461becc54b1` additionally passed the full portable suite and fresh public-archive installation. Existing release tags remain unchanged. See `VALIDATION.md` for artifact/checksum and test boundaries.
+
+Alternatively install the release tarball with `npm install -g /path/to/codex-teams-0.1.5-rc.1.tgz`. From a checkout: `npm ci && npm pack`, then globally install that tarball. The npm registry name `codex-teams` is occupied; do not install the bare package name. The candidate is built from reviewed `main` source; use immutable release archives once a final version is published. Restart Codex after adding the MCP entry/skill. Existing settings and unrelated MCP entries are preserved; either conflicting CLI alias (`cteam` or `codex-teams`) or an unrelated MCP entry named `codex-teams` cause installation to refuse before modifying configuration. Supported Codex registration is validated in a private staging config; only the owned MCP table is merged into the original text, preserving unrelated empty arrays/comments. Concurrent config edits detected before commit cause a safe retry.
+
+For macOS background startup, after the portable steps run:
+
+```sh
+cteam service stop
+cteam install --launchagent
+cteam service status
+```
+
+This installs one `~/Library/LaunchAgents/com.codex-teams.service.plist` with absolute Node, script and Codex executable paths. The user LaunchAgent starts at login and keeps the service alive while the Mac is awake. `cteam service stop` bootouts only the owned job so KeepAlive cannot immediately restart it; the plist stays installed. `cteam service start` bootstraps the owned plist when unloaded or kickstarts the owned loaded job without forcing an active service restart. A separately detached instance is shut down before bootstrap to avoid a port conflict. Ownership checks cover a canonical regular plist, the marker, exact label, expected Node runtime/service script and loaded plist path, and reject executable overrides; changed integration paths require reinstalling. Closing the dashboard/chat does not stop work. Sleep/shutdown stops local execution; no Cloud hosting or wake guarantee is implied. Changing Node/package installation paths requires reinstalling the LaunchAgent. Real `launchctl` stop/start behavior passed on the consumer Mac for v0.1.3; each new installation should still verify its own startup. Linux checks alone cannot establish it.
+
+On the Mac, these are the reversible manual equivalents for the owned integration (real consumer Mac controls passed on v0.1.3):
+
+```sh
+launchctl bootout "gui/$(id -u)/com.codex-teams.service"
+launchctl bootstrap "gui/$(id -u)" "$HOME/Library/LaunchAgents/com.codex-teams.service.plist"
+launchctl kickstart "gui/$(id -u)/com.codex-teams.service"
+```
+
+Linux supports the tested detached service and foreground `cteam service start --foreground`. There is no Linux boot integration. **Windows: coming soon.** Installation/service behavior has not been validated and is unsupported for this release. The dashboard binds **127.0.0.1 only**. `dashboard` opens a credential URL fragment locally; treat the printed URL as private. It is removed from the address bar and kept in tab session storage; **Lock** clears it. Do not forward the port or expose it publicly.
+
+## Persistent runner reliability and usability
 
 This update adds strict CLI validation, dashboard draft/retry protection, structured
 approvals, filtered/paginated history, goal handoffs, explicit budget extensions,
@@ -104,91 +195,17 @@ auto-verifies tasks or replays ambiguous deliveries.
 
 Tasks now also support `build` and `typecheck` evidence. A captured successful
 `tsc --noEmit`, or a configured `npm|pnpm|yarn|bun run build|typecheck` command,
-can meet its matching requirement. Unsupported, help, dry-run, trivial, and failed
-commands are rejected. Silent typecheck success is valid. These kinds cannot
+can meet its matching requirement. Package scripts must invoke a recognized
+validator: typechecks use `tsc --noEmit`, `vue-tsc --noEmit`, or `svelte-check`;
+builds use emitting `tsc`, `vite|next|astro|nuxt build`, or `webpack`, `rollup`,
+`tsup`, or `esbuild`. Arbitrary custom scripts, reporting/config-only commands,
+help, dry-run, watch, trivial, and failed commands are rejected. Silent typecheck success is valid. These kinds cannot
 satisfy a behavioral-test requirement, and goal-lead verification remains required.
 
 For browser regressions, install development dependencies and provide Chromium at
 `/usr/bin/chromium` or set `CHROMIUM_PATH`. The real-browser test skips when no
 browser is available; DOM-based interaction tests still run. These tests use
 mocked service responses and consume no model turns.
-
-A local MCP server, CLI and dashboard for persistent project teams. Each goal snapshots an editable roster and gives each participating agent an independent durable Codex app-server thread. The goal chooses its lead. Direct messages, owned tasks/dependencies, captured evidence and lead verification coordinate work; idle roster members use no model turns.
-
-**Candidate:** 0.1.5-rc.1 on `qa/cloud-local-release` · **Documentation:** this README and [release checks](RELEASE_CHECKLIST.md) · **License:** [MIT](LICENSE).
-
-This is an unreleased verification candidate. It includes the security fixes and
-native workflow merged to main. No 0.1.5 tag or hosted-plugin listing is published.
-The old v0.1.4 archive still contains dependencies flagged by the later audit;
-use the reviewed candidate source when testing these changes. The npm registry
-name `codex-teams` belongs to a different distribution.
-
-| Platform/mode | Status |
-| --- | --- |
-| Local macOS runner | Historical live acceptance passed; this candidate's Mac installation/service checks are pending |
-| Linux portable runner | Automated and isolated package checks run here; no system boot integration |
-| Native Cloud/local chat | Experimental; build/correction/failure/cancellation exercised in the existing Cloud chat; fresh-host and second-account checks pending |
-| Windows | Unsupported/unvalidated |
-
-The dependency updates remove the advisories found in the older lockfile. A clean
-audit is not a guarantee of absence of vulnerabilities. See [validation](VALIDATION.md)
-and [the release checklist](RELEASE_CHECKLIST.md) for exact boundaries. Model work
-requires the user's own eligible host/account; the project supplies no shared
-account or free model entitlement.
-
-The primary command is **`cteam`**. **`codex-teams`** remains a compatible alias. The package/repository, MCP entry/tool names, configuration and environment variables retain their existing Codex Teams names.
-
-## Cloud or native chat teams (experimental, unreleased)
-
-A separate [native chat workflow](CLOUD.md) uses the active chat's own subagents
-in eligible Cloud or local hosts. A real Cloud researcher-to-builder correction
-passed 20 tests plus independent lead assertions. The new `cteam native install`
-command installs reusable instructions; it does not launch agents or grant host
-capabilities. The local persistent runner below remains a separate choice.
-Hosted plugin installation and multi-account availability are not yet verified.
-The v0.1.4 download above does not contain this feature.
-
-## Install
-
-Requires Node **22.22.0 or later**, npm and **Codex CLI exactly 0.163.0**. Node's built-in SQLite may display an experimental warning on Node 22. Existing Codex-managed **ChatGPT login** is required only for model work. There is no API-key/provider fallback, shared account, token copying or credit purchase.
-
-Build the candidate with `npm ci && npm pack` from this branch. Run `npm run verify:install` before changing an existing installation. For a reviewed local installation:
-
-```sh
-npm install -g @openai/codex@0.163.0
-npm install -g /absolute/path/to/codex-teams-0.1.5-rc.1.tgz
-codex --version                 # codex-cli 0.163.0
-codex login status              # reuse your own existing ChatGPT login
-cteam install             # backs up Codex config; adds one MCP + usage skill
-cteam service start
-cteam init /absolute/path/to/project
-```
-
-The dashboard is optional: run `cteam dashboard` only if you want the browser view. If you are not already logged in, use `codex login` with your own supported ChatGPT account before requesting model work.
-
-Credential-free public HTTPS installation, clean-prefix CLI/MCP/dashboard checks and package audits passed. Live Mac acceptance exercised `f596621f41966717e53aac558d4acd044c261e3d`; terminal recovery follow-up `85c6fc4480368f8431001dd432a54461becc54b1` additionally passed the full portable suite and fresh public-archive installation. Existing release tags remain unchanged. See `VALIDATION.md` for artifact/checksum and test boundaries.
-
-Alternatively install the release tarball with `npm install -g /path/to/codex-teams-0.1.5-rc.1.tgz`. From a checkout: `npm ci && npm pack`, then globally install that tarball. The npm registry name `codex-teams` is occupied; do not install the bare package name. The candidate is built from its source branch; use immutable release archives once a final version is published. Restart Codex after adding the MCP entry/skill. Existing settings and unrelated MCP entries are preserved; either conflicting CLI alias (`cteam` or `codex-teams`) or an unrelated MCP entry named `codex-teams` cause installation to refuse before modifying configuration. Supported Codex registration is validated in a private staging config; only the owned MCP table is merged into the original text, preserving unrelated empty arrays/comments. Concurrent config edits detected before commit cause a safe retry.
-
-For macOS background startup, after the portable steps run:
-
-```sh
-cteam service stop
-cteam install --launchagent
-cteam service status
-```
-
-This installs one `~/Library/LaunchAgents/com.codex-teams.service.plist` with absolute Node, script and Codex executable paths. The user LaunchAgent starts at login and keeps the service alive while the Mac is awake. `cteam service stop` bootouts only the owned job so KeepAlive cannot immediately restart it; the plist stays installed. `cteam service start` bootstraps the owned plist when unloaded or kickstarts the owned loaded job without forcing an active service restart. A separately detached instance is shut down before bootstrap to avoid a port conflict. Ownership checks cover a canonical regular plist, the marker, exact label, expected Node runtime/service script and loaded plist path, and reject executable overrides; changed integration paths require reinstalling. Closing the dashboard/chat does not stop work. Sleep/shutdown stops local execution; no Cloud hosting or wake guarantee is implied. Changing Node/package installation paths requires reinstalling the LaunchAgent. Real `launchctl` stop/start behavior passed on the consumer Mac for v0.1.3; each new installation should still verify its own startup. Linux checks alone cannot establish it.
-
-On the Mac, these are the reversible manual equivalents for the owned integration (real consumer Mac controls passed on v0.1.3):
-
-```sh
-launchctl bootout "gui/$(id -u)/com.codex-teams.service"
-launchctl bootstrap "gui/$(id -u)" "$HOME/Library/LaunchAgents/com.codex-teams.service.plist"
-launchctl kickstart "gui/$(id -u)/com.codex-teams.service"
-```
-
-Linux supports the tested detached service and foreground `cteam service start --foreground`. There is no Linux boot integration. **Windows: coming soon.** Installation/service behavior has not been validated and is unsupported for this release. The dashboard binds **127.0.0.1 only**. `dashboard` opens a credential URL fragment locally; treat the printed URL as private. It is removed from the address bar and kept in tab session storage; **Lock** clears it. Do not forward the port or expose it publicly.
 
 ## Use
 
@@ -222,7 +239,7 @@ cteam stop --goal GOAL_ID
 cteam service stop
 ```
 
-Ordinary Codex requests never start teams automatically. Ask explicitly for team execution. Normal MCP tools require the calling chat's `cwd` or an explicit `project`; they never infer the daemon's cwd. The service must be running before CLI/MCP operations other than init/install. CLI finds the nearest `.codex-teams/team.json`; `--project /path/or/registered-id` overrides. Created worktree aliases resolve to the owning project.
+Ordinary Codex requests never start teams automatically. Ask explicitly for team execution. Normal MCP tools require the calling chat's `cwd` or an explicit `project`; they never infer the daemon's cwd. Service-backed goal, roster, task, history and approval operations require the persistent service. Help, init, installation, native commands, local doctor checks and restore do not need an existing service; self-test and verify-install manage their own isolated checks. CLI finds the nearest `.codex-teams/team.json`; `--project /path/or/registered-id` overrides. Created worktree aliases resolve to the owning project.
 
 ```sh
 cd /path/to/project
@@ -259,7 +276,7 @@ cteam approvals resolve APPROVAL_ID --json '{"decision":"decline"}'
 
 The dashboard supports the same roster/configuration/specification edits, participants/lead selection, goals, messages, conversations, tasks/dependencies, evidence, notes, limits/usage, activity, interruption, goal/project controls and human approval responses. The dashboard can create tasks, request corrections and verify captured evidence as the goal lead, and displays criteria, dependencies and ownership. Save reusable goals in canonical JSON `specifications: [{"name":"…","prompt":"…","criteria":"…"}]`.
 
-Normal MCP tools: `team_initialize`, `team_goal`, `team_message`, `team_status`, `team_control`, `team_interrupt`, `team_config`, `team_roster`, `team_reopen`, `team_add_participant`, `team_tasks`, `team_notes`, `team_conversations`, `team_approvals`, `team_recovery`, `team_service`, `team_dashboard`. Member MCP exposes only scoped status, task creation/claim/revision/verification, messages, notes and completion; identity is bound to service credentials. Members cannot approve human requests. Inherited MCP servers are disabled per member thread; their on-disk settings are preserved.
+Human MCP exposes 25 tools: `team_initialize`, `team_goal`, `team_message`, `team_status`, `team_control`, `team_interrupt`, `team_config`, `team_roster`, `team_reopen`, `team_add_participant`, `team_tasks`, `team_notes`, `team_conversations`, `team_approvals`, `team_recovery`, `team_service`, `team_dashboard`, `team_projects`, `team_doctor`, `team_read`, `team_goal_summary`, `team_handoff`, `team_budget`, `team_note_update`, and `team_preview`. Member MCP exposes only scoped status, task creation/claim/revision/verification, messages, notes and completion; identity is bound to service credentials. Members cannot approve human requests. Inherited MCP servers are disabled per member thread; their on-disk settings are preserved.
 
 ## Configuration, permissions and evidence
 

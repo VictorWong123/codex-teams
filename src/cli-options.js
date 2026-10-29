@@ -18,7 +18,7 @@ const definitions = {
  service: ['start status stop config', ['foreground','json','file'], 0, 0],
  dashboard: ['', ['no-open'], 0, 0], install: ['', ['launchagent'], 0, 0], uninstall: ['', [], 0, 0],
  'self-test': ['', ['live'], 0, 0], 'verify-install': ['', [], 0, 0],
- native: ['instructions install', ['scope','project'], 0, 0],
+ native: ['instructions install status', ['scope','project'], 0, 0],
  doctor: ['', ['project','json'], 0, 0], projects: ['list activate', ['acknowledge'], 0, 1],
  handoff: ['', ['project','goal','format'], 0, 0],
  storage: ['', ['json'], 0, 0], backup: ['', ['destination'], 0, 0], restore: ['', ['source','destination'], 0, 0],
@@ -45,7 +45,7 @@ export function parseArgs(args) {
  let [subs,allowed,min,max]=definition, positional=words.slice(1),sub;
  if(cmd==='goal'&&positional[0]==='budget'&&literalFrom>1){sub=positional.shift();allowed=['project','goal','turns','minutes','tokens'];min=max=0;}
  else if(subs){sub=positional.shift()||(['config','roster','tasks','notes','approvals','projects'].includes(cmd)?subs.split(' ')[0]:null);if(!subs.split(' ').includes(sub))throw new Error(`${cmd} requires one of: ${subs}`);}
- const variants={config:{get:['project'],set:['project','json','file']},roster:{list:['project'],disable:['project'],remove:['project'],model:['project','model']},tasks:{list:['project'],claim:['project','agent','json','file'],verify:['project','agent','json','file'],revise:['project','json','file']},notes:{list:['project','search','page','cursor','limit'],archive:['project'],unarchive:['project'],edit:['project','json','file'],add:['project','json','file']},approvals:{list:['project'],resolve:['project','json','file']},service:{status:[],stop:[],start:['foreground'],config:['json','file']},native:{instructions:[],install:['scope','project']},projects:{list:[],activate:['acknowledge']}};allowed=variants[cmd]?.[sub]||allowed;
+ const variants={config:{get:['project'],set:['project','json','file']},roster:{list:['project'],disable:['project'],remove:['project'],model:['project','model']},tasks:{list:['project'],claim:['project','agent','json','file'],verify:['project','agent','json','file'],revise:['project','json','file']},notes:{list:['project','search','page','cursor','limit'],archive:['project'],unarchive:['project'],edit:['project','json','file'],add:['project','json','file']},approvals:{list:['project'],resolve:['project','json','file']},service:{status:[],stop:[],start:['foreground'],config:['json','file']},native:{instructions:[],install:['scope','project'],status:['scope','project']},projects:{list:[],activate:['acknowledge']}};allowed=variants[cmd]?.[sub]||allowed;
  for(const key of Object.keys(flags))if(!allowed.includes(key))throw new Error(`Unknown option --${key} for ${cmd}${sub?' '+sub:''}`);
  if(positional.length<min||positional.length>max)throw new Error(`Unexpected or missing arguments for ${cmd}`);
  const requireFlag=name=>{if(!flags[name])throw new Error(`--${name} is required`);};
@@ -59,7 +59,7 @@ export function parseArgs(args) {
  if(cmd==='interrupt')requireFlag('agent');
  if(cmd==='projects'&&sub==='activate'){requireId();requireFlag('acknowledge');}
  if(cmd==='projects'&&sub==='list'&&positional.length)throw new Error('projects list takes no arguments');
- if(cmd==='native'&&sub==='install')requireFlag('scope');
+ if(cmd==='native'&&['install','status'].includes(sub))requireFlag('scope');
  if(cmd==='backup'||cmd==='restore')requireFlag('destination');if(cmd==='restore')requireFlag('source');
  if(flags.json&&flags.file)throw new Error('Choose --json or --file');
  if(cmd==='config'&&sub==='set'&&!flags.json&&!flags.file)throw new Error('config set requires --json or --file');

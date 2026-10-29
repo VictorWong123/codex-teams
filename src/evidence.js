@@ -6,12 +6,27 @@ export function commandWords(command){if(typeof command!=='string'||/[\n\r`$#;&|
 export function applicableCommand(command,type){let a=commandWords(command);if(!a?.length||a.slice(1).some(v=>/^(?:--?(?:help|version|list|list-tests|collect-only|showconfig|dry-run|ignore-scripts)|-[hVv])(?:=|$)/i.test(v)))return false;const exe=a[0].split('/').at(-1);if(['bash','sh','zsh'].includes(exe)){if(a.length!==3||!['-c','-lc'].includes(a[1]))return false;return applicableCommand(a[2],type);}if(type==='research')return ['rg','cat','git','find'].includes(exe)&&a.length>1&&a.slice(1).every(v=>!v.includes('\n'));if(['npm','pnpm','yarn','bun'].includes(exe))return a[1]==='test'||a[1]==='run'&&a[2]==='test';if(exe==='node')return a[1]==='--test';if(['pytest','jest','vitest','mocha'].includes(exe))return true;return ['cargo','go'].includes(exe)&&a[1]==='test';}
 export function passingTestOutput(output){if(typeof output!=='string'||/\[(?:no tests to run|no test files)\]/i.test(output))return false;return /(?:#|ℹ)\s*pass\s+[1-9]\d*\b/.test(output)&&/(?:#|ℹ)\s*fail\s+0\b/.test(output)||/\b[1-9]\d*\s+passed\b/.test(output)&&!/(?:\b[1-9]\d*\s+(?:failed|failing)\b|\bFAIL(?:ED)?\b)/.test(output)||/\b[1-9]\d*\s+passing\b/.test(output)&&!/[1-9]\d*\s+failing/.test(output)||/^ok\s+\S+/m.test(output)&&!/^FAIL/m.test(output);}
 export function researchResults(results){if(!Array.isArray(results)||!results.length||!/https?:\/\//.test(JSON.stringify(results)))return false;const visit=value=>{if(!value||typeof value!=='object')return false;return Object.entries(value).some(([key,v])=>['text','content','snippet','title'].includes(key)&&typeof v==='string'&&v.trim().length>=20||v&&typeof v==='object'&&visit(v));};return results.some(visit);}
+const reportOnly = /^(?:--?(?:help|version|dry-run|list(?:-tests|FilesOnly)?|showConfig|watch|ignore-scripts|init|clean|noCheck)|-[hVvw])(?:=|$)/i;
+function validationTool(words,type){
+ if(!words?.length||words.slice(1).some(w=>reportOnly.test(w)||['help','version','init','info','configtest','watch','serve'].includes(w)))return false;
+ const executable=words[0].split('/').at(-1),args=words.slice(1);
+ if(type==='typecheck'){
+  if(['tsc','vue-tsc'].includes(executable)){
+   const noEmit=args.indexOf('--noEmit');
+   return noEmit>=0&&args[noEmit+1]!=='false'&&!args.some(w=>/^--noEmit=|^--noCheck/i.test(w));
+  }
+  return executable==='svelte-check';
+ }
+ if(type!=='build')return false;
+ if(executable==='tsc')return !args.some(w=>/^--noEmit(?:=|$)/i.test(w));
+ if(['vite','next','astro','nuxt'].includes(executable))return args[0]==='build';
+ return ['webpack','rollup','tsup','esbuild'].includes(executable)&&!args.includes('--help');
+}
 export function validationCommand(command,type,workspace){
- let words=commandWords(command);if(!words?.length)return false;
+ const words=commandWords(command);if(!words?.length)return false;
  const executable=words[0].split('/').at(-1);
  if(['bash','sh','zsh'].includes(executable))return words.length===3&&['-c','-lc'].includes(words[1])&&validationCommand(words[2],type,workspace);
- if(words.some(w=>/^(?:--?(?:help|version|dry-run|list|showConfig|watch|ignore-scripts)|-[hVvw])(?:=|$)/i.test(w)))return false;
- if(type==='typecheck'&&executable==='tsc')return words.includes('--noEmit')&&!words.includes('false')&&words.every((w,i)=>i===0||['--noEmit','--pretty','false','true','--project','-p'].includes(w)||i>0&&['--project','-p'].includes(words[i-1]));
+ if(type==='typecheck'&&executable==='tsc')return validationTool(words,type);
  if(!['npm','pnpm','yarn','bun'].includes(executable)||words.length!==3||words[1]!=='run'||words[2]!==type)return false;
- try{const script=JSON.parse(readFileSync(join(workspace,'package.json'),'utf8')).scripts?.[type];const parts=commandWords(script);return !!parts?.length&&!parts.some(w=>/^(echo|true|printf)$/.test(w))&&!parts.some(w=>/help|dry-run|ignore-scripts/.test(w));}catch{return false;}
+ try{return validationTool(commandWords(JSON.parse(readFileSync(join(workspace,'package.json'),'utf8')).scripts?.[type]),type);}catch{return false;}
 }

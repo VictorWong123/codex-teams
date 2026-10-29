@@ -1,4 +1,47 @@
-# Release validation — 2026-10-16
+# Release validation history
+
+## Combined PR #4/#5 verification — 2026-10-28 (unreleased)
+
+Integrated native Cloud setup at `8f68d23` with the reliability/usability branch
+at `96b78e3`. Resolved the README conflict while retaining both workflows and
+preserved `native status` in the strict CLI parser. Current candidate checks ran
+on Linux with Node 24.19.0, Codex 0.163.0 and Chromium.
+
+Targeted security, frontend and integration review identified and verified fixes
+for four additional problems:
+
+- Old dashboard refreshes cannot overwrite a newer project/goal selection or
+  connection, and controls captured from another project cannot submit actions.
+- Bounded dashboard status retains active participants even when hundreds of
+  historical participant rows exist, keeping running state and interruption
+  controls visible.
+- Build/typecheck evidence requires a recognized validation command. Report-only,
+  help/version, dry-run and no-op package scripts cannot satisfy a requirement;
+  a real silent `tsc --noEmit` can still satisfy typecheck evidence.
+- Command notifications received before the `turn/start` response retain the
+  task/attempt binding observed at arrival, including explicitly unowned starts.
+  Buffer replay cannot credit a command to a subsequently claimed task.
+
+Validation of the combined implementation:
+
+- **101 tests passed, zero failures and zero skips**, including deterministic
+  regressions for the findings, actual Chromium interactions and matching-Codex
+  configuration/protocol checks. Syntax and whitespace checks passed.
+- Full dependency audit reported **zero known vulnerabilities**.
+- A fresh tarball installed into an isolated npm prefix passed all nine verifier
+  checks, including the actual MCP handshake with 25 human tools, caller-context
+  isolation, dashboard CSP and unauthenticated/cross-origin rejection. The verifier
+  recorded zero model turns and successful service/state cleanup.
+- The archive includes both repository routing and native workflow skills. An
+  extracted archive bootstrapped a disposable project's native skill without npm
+  dependencies, and a repeated setup was unchanged. Archive inspection found no
+  runtime state, credential files, tests or node_modules.
+
+No new consumer live-model acceptance, actual Mac installation, separate account,
+fresh published Cloud environment or hosted-plugin activation is established by
+these checks. Native mode remains bounded active-chat orchestration; the candidate
+does not provision continuous 24/7 hosting. The earlier results below retain their
+original scope and test counts. See [release gates](RELEASE_CHECKLIST.md).
 
 ## Security and performance follow-up — 2026-10-28
 
@@ -64,6 +107,8 @@ These checks do not establish Mac LaunchAgent behavior, a separate user/account,
 new native-host activation, or new consumer model acceptance. Existing acceptance
 caps were not expanded. Notifications, automatic retention, automatic merges,
 and native cross-chat durability remain outside this update.
+
+## Historical release checkpoints — from 2026-10-16
 
 Implementation started from exact handoff `2e69034980c79720136db6e9057c7a2c7493d5ca`. This document distinguishes portable Cloud checks from actual consumer Mac/model evidence. The accepted release is v0.1.3: actual Mac live QA exercised `f596621f41966717e53aac558d4acd044c261e3d`; terminal recovery follow-up `85c6fc4480368f8431001dd432a54461becc54b1` passed portable checks and fresh public-archive installation. Its separate Mac terminal-recovery check remains unreported. Tarball checksums and final documentation commit/push evidence are reported with the release in the Cloud chat.
 

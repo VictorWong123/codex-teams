@@ -2,7 +2,7 @@
 
 ## Implementation status — 2026-10-28
 
-All 19 numbered items are implemented on `feat/reliability-usability`, together
+All 19 numbered items are integrated on `main`, together
 with reviewed worktree handoff, supported-version upgrade guidance, and three
 opt-in starter specifications. The investigation below remains as historical
 rationale; its line references and original QA checkpoint are not current.
