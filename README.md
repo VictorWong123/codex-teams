@@ -1,8 +1,8 @@
 # Codex Teams
 
-A local MCP server, CLI and dashboard for persistent project teams. Each goal snapshots an editable roster and gives each participating agent an independent durable Codex app-server thread. The goal chooses its lead. Direct messages, owned tasks/dependencies, captured evidence and lead verification coordinate work; idle roster members use no model turns.
+Codex Teams supports native teams inside an eligible Cloud/local chat and a separate persistent runner with a CLI, MCP server and dashboard. In the persistent runner, each goal snapshots an editable roster and gives each participating agent an independent durable Codex app-server thread. The goal chooses its lead. Direct messages, owned tasks/dependencies, captured evidence and lead verification coordinate work; idle roster members use no model turns.
 
-**Candidate:** 0.1.5-rc.1 on `qa/cloud-local-release` · **Documentation:** this README and [release checks](RELEASE_CHECKLIST.md) · **License:** [MIT](LICENSE).
+**Candidate:** 0.1.5-rc.1 source · **Documentation:** this README and [release checks](RELEASE_CHECKLIST.md) · **License:** [MIT](LICENSE).
 
 This is an unreleased verification candidate. It includes the security fixes and
 native workflow merged to main. No 0.1.5 tag or hosted-plugin listing is published.
@@ -33,9 +33,22 @@ passed 20 tests plus independent lead assertions. The new `cteam native install`
 command installs reusable instructions; it does not launch agents or grant host
 capabilities. The local persistent runner below remains a separate choice.
 Hosted plugin installation and multi-account availability are not yet verified.
-The v0.1.4 download above does not contain this feature.
+The old v0.1.4 release does not contain this feature.
 
-## Install
+To set up native mode from a reviewed checkout **in the Cloud environment**:
+
+```sh
+node scripts/setup-cloud.mjs
+```
+
+Then ask the Cloud chat to read the installed `codex-teams-native` skill and use
+it for your goal. This setup needs no npm dependencies or separate Codex login.
+It reports instruction installation separately from the native tools the chat
+must verify. Mac-installed personal skills do not sync into Cloud. See
+[Cloud setup, project scope and 24/7 limits](CLOUD.md). Native mode runs within an
+active task; an always-running research lab needs separate scheduling and hosting.
+
+## Install the persistent runner
 
 Requires Node **22.22.0 or later**, npm and **Codex CLI exactly 0.163.0**. Node's built-in SQLite may display an experimental warning on Node 22. Existing Codex-managed **ChatGPT login** is required only for model work. There is no API-key/provider fallback, shared account, token copying or credit purchase.
 

@@ -16,7 +16,7 @@ export class AppServer extends EventEmitter {
     await this.request("initialize",{clientInfo:{name:"codex-teams",title:"Codex Teams",version:"0.1.5-rc.1"},capabilities:{experimentalApi:true}});
     this.notify("initialized",{});
     const account=await this.request("account/read",{refreshToken:false});
-    if(account.account?.type!=="chatgpt"){await this.stop();throw new Error("Codex Teams requires existing ChatGPT authentication. Run `codex login`; API-key and separately billed provider authentication are refused.");}
+    if(account.account?.type!=="chatgpt"){await this.stop();throw new Error("Codex Teams requires existing ChatGPT authentication. For the persistent runner on your own machine, run `codex login`. In managed Codex Cloud, use the native chat workflow (see CLOUD.md or `cteam native instructions`); API-key and separately billed provider authentication are refused.");}
     return account;
   }
   handle(msg){if(msg.id!==undefined&&(msg.result!==undefined||msg.error)){const p=this.pending.get(String(msg.id));if(!p)return;this.pending.delete(String(msg.id));clearTimeout(p.timer);msg.error?p.reject(new Error(msg.error.message||JSON.stringify(msg.error))):p.resolve(msg.result);return;}if(msg.id!==undefined&&msg.method){this.emit("request",msg);return;}if(msg.method)this.emit("notification",msg);}
