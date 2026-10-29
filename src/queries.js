@@ -1,7 +1,7 @@
 import {revision} from './workflows.js';
 const collections={conversations:['turns','started_at',['prompt','output']],events:['events','created_at',['type','data_json']],messages:['messages','created_at',['body']],evidence:['evidence','created_at',['command','output']],goals:['goals','created_at',['title','prompt']],tasks:['tasks','created_at',['title','description']],notes:['notes','created_at',['title','body']]};
 export function page(s,kind,query={}) {
- const def=collections[kind];if(!def)throw new Error('Unknown collection');const [table,time,search]=def,limit=Number(query.limit||50);if(!Number.isInteger(limit)||limit<1||limit>200)throw new Error('limit must be 1–200');
+ const def=Object.hasOwn(collections,kind)?collections[kind]:null;if(!def)throw new Error('Unknown collection');const [table,time,search]=def,limit=Number(query.limit||50);if(!Number.isInteger(limit)||limit<1||limit>200)throw new Error('limit must be 1–200');
  const clauses=[],params=[],columns=s.rows(`PRAGMA table_info(${table})`).map(c=>c.name),filters={project:s.id,kind,goal:query.goal||null,agent:query.agent||null,status:query.status||null,search:query.search||''};
  if(query.goal){clauses.push(`${table==='goals'?'id':'goal_id'}=?`);params.push(query.goal);}
  if(query.agent){const column=columns.includes('agent_id')?'agent_id':columns.includes('owner_agent_id')?'owner_agent_id':null;if(!column)throw new Error('Agent filtering is unavailable for this collection');clauses.push(`${column}=?`);params.push(query.agent);}
@@ -13,20 +13,22 @@ export function page(s,kind,query={}) {
 }
 export function goalSummary(s,goalId) {
  const goal=s.requireGoal(goalId),cfg=JSON.parse(goal.config_json),participants=s.rows('SELECT * FROM participants WHERE goal_id=?',goalId),tasks=s.rows('SELECT * FROM tasks WHERE goal_id=?',goalId),approvals=s.rows("SELECT * FROM approvals WHERE goal_id=? AND status='pending'",goalId);
- return {goal,limits:cfg.limits,baseline:cfg.baseline||null,participants,tasks,approvals,blocker:approvals.length?'approval':!['queued','running','completed'].includes(goal.status)?goal.status:tasks.some(t=>t.status==='pending'&&JSON.parse(t.depends_json).some(id=>tasks.find(x=>x.id===id)?.status!=='verified'))?'dependencies':null};
+ const taskStates=new Map(tasks.map(t=>[t.id,t.status]));
+ return {goal,limits:cfg.limits,baseline:cfg.baseline||null,participants,tasks,approvals,blocker:approvals.length?'approval':!['queued','running','completed'].includes(goal.status)?goal.status:tasks.some(t=>t.status==='pending'&&JSON.parse(t.depends_json).some(id=>taskStates.get(id)!=='verified'))?'dependencies':null};
 }
 export function handoff(s,goalId) {
  const summary=goalSummary(s,goalId);return {...summary,evidence:s.rows('SELECT * FROM evidence WHERE goal_id=? ORDER BY created_at,id',goalId),workspaces:summary.participants.map(p=>({agent:JSON.parse(p.snapshot_json).name,path:p.workspace,branch:p.workspace&&p.workspace!==s.root?`codex-teams/${goalId}/${p.agent_id}`:null,base:summary.baseline?.sha||null})),integration:'Inspect each listed workspace and branch, review the diff and captured evidence, then integrate only the changes you approve. No automatic merge or cleanup is performed.',cost:'unknown'};
 }
-export function queueReason(s,g,o){
+export function queueReason(s,g,o,context){
  if(s.config.paused)return 'Project paused';
  if(!['queued','running'].includes(g.status))return g.status;
  if(s.row("SELECT 1 FROM approvals WHERE goal_id=? AND status='pending'",g.id))return 'Waiting for human approval';
- const active=[...o.active.values()];if(active.some(a=>a.goal===g.id))return 'Participant running';
- if(active.length>=o.registry.concurrency())return 'Waiting for service capacity';
+ const active=context?.active||[...o.active.values()];if(active.some(a=>a.goal===g.id))return 'Participant running';
+ if(active.length>=(context?.globalLimit??o.registry.concurrency()))return 'Waiting for service capacity';
  if(active.filter(a=>a.project===s.id).length>=s.config.limits.projectConcurrency)return 'Waiting for project capacity';
  if(s.row("SELECT 1 FROM participants WHERE goal_id=? AND status IN ('running','starting')",g.id))return 'Waiting for busy participant';
  const tasks=s.rows("SELECT * FROM tasks WHERE goal_id=? AND status='pending'",g.id);
- if(tasks.length&&tasks.every(t=>JSON.parse(t.depends_json).some(id=>s.task(id)?.status!=='verified')))return 'Waiting for dependencies';
+ const taskStates=tasks.length?new Map(s.rows('SELECT id,status FROM tasks WHERE goal_id=?',g.id).map(t=>[t.id,t.status])):new Map();
+ if(tasks.length&&tasks.every(t=>JSON.parse(t.depends_json).some(id=>taskStates.get(id)!=='verified')))return 'Waiting for dependencies';
  return g.status==='queued'||tasks.length?'Ready for scheduling':'Waiting for an actionable message or lead review';
 }

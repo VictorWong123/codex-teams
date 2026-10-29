@@ -1,5 +1,36 @@
 # Release validation — 2026-10-16
 
+## Security and performance follow-up — 2026-10-28
+
+Reviewed the implementation at `b46ca5a` and fixed concrete lifecycle, input,
+backup and evidence issues without changing the supported CLI/MCP tool inventory.
+
+- Commands observed starting without a task now retain an explicit unbound item
+  record; claiming a task later cannot retroactively make that command its evidence.
+- Multiple pending approvals keep a turn blocked until the last response. Stale
+  turn responses are rejected; the inactivity clock restarts after approval waits.
+- Failed port binding cannot run recovery or scheduling against another service's
+  active work. Completed/stopped goals and disabled participants reject mutations
+  before changing state; resume-all validates recovery blockers before any update.
+- JSON requests preserve UTF-8 across chunk boundaries and require object bodies.
+  Malformed multibyte bearer credentials receive an authorization failure rather
+  than a timing-comparison exception.
+- Backup destinations resolve parent symlinks and reject all descendants of active
+  state, including names beginning with `..`. Database hashing and restore copying
+  use 64 KiB chunks, rechecking the copied digest before opening restored SQLite.
+- Unchanged roster synchronization performs zero row writes. Additive nonunique
+  indexes cover hot scheduler/evidence/recovery lookups without changing schema
+  version or rejecting older backups. Dependency status uses in-memory lookups;
+  dashboard bootstrap omits history already fetched through paginated endpoints.
+  Legacy full-status responses are preserved.
+
+Validation: syntax and diff checks passed; **90 tests passed, 3 existing
+matching-Codex integration checks skipped**, zero failures. The real Chromium
+dashboard check passed. Full dependency audit reported zero known vulnerabilities.
+A fresh packed installation passed all nine verifier checks with zero model turns.
+Read-only security/test reviews confirmed the reported fixes. No real model turns,
+Mac installation changes, or new host/account acceptance claims were made.
+
 ## Reliability/usability implementation — 2026-10-28 (unreleased)
 
 Implemented from `main` revision `8039a39`. Portable checks ran on Linux,

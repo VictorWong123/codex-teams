@@ -1,3 +1,4 @@
+import {ensureQueryIndexes} from './query-indexes.js';
 import {migrate} from './migrations.js';
 import {revision,sourceBaseline} from './workflows.js';
 import { DatabaseSync } from "node:sqlite";
@@ -30,11 +31,12 @@ export class ProjectStore {
   constructor(root, config) {
     this.root = root; this.config = validateConfig(config); this.id = projectId(root);
     const dir = ensureDir(join(DATA_DIR, "projects", this.id));
-    this.db = new DatabaseSync(join(dir, "state.sqlite")); this.db.exec(schema);
-    migrate(this.db);
-    this.syncRoster(this.config.agents);
+    this.db = new DatabaseSync(join(dir, "state.sqlite"));try{if(this.db.prepare('PRAGMA user_version').get().user_version>1)throw new Error('State was written by a newer Codex Teams version');this.db.exec(schema);migrate(this.db);ensureQueryIndexes(this.db);this.syncRoster(this.config.agents);}catch(e){this.db.close();throw e;}
   }
   syncRoster(agents) {
+    const existing=this.rows('SELECT * FROM agents'),byId=new Map(existing.map(a=>[a.id,a])),wanted=new Set(agents.map(a=>a.id));
+    const unchanged=agents.every(a=>{const old=byId.get(a.id);return old&&old.name===a.name&&old.purpose===a.purpose&&old.instructions===a.instructions&&old.model===(a.model||this.config.defaultModel)&&old.permission===a.permission&&old.enabled===(a.enabled?1:0);})&&existing.every(a=>wanted.has(a.id)||!a.enabled&&a.name===`[retired:${a.id}]`);
+    if(unchanged)return;
     this.db.exec('BEGIN IMMEDIATE');try{for(const row of this.rows('SELECT id,name FROM agents'))this.db.prepare('UPDATE agents SET enabled=0,name=? WHERE id=?').run(`[retired:${row.id}]`,row.id);for(const input of agents)this.saveAgent({...input,model:input.model??null});this.db.exec('COMMIT');}catch(e){this.db.exec('ROLLBACK');throw e;}
   }
   rows(sql,...args) { return this.db.prepare(sql).all(...args); }
@@ -79,7 +81,7 @@ export class ProjectStore {
   assertMutableGoal(goalId){const g=this.requireGoal(goalId);if(["completed","stopped"].includes(g.status))throw new Error("Goal is terminal; reopen it explicitly before modifying");return g;}
   requireGoal(goalId){const g=this.row("SELECT * FROM goals WHERE id=?",goalId);if(!g)throw new Error("Goal not found");return g;}
   task(taskId){const t=this.row("SELECT * FROM tasks WHERE id=?",taskId);return t?{...t,depends:parse(t.depends_json,[])}:null;}
-  status(bounded=false){const cap=bounded?' LIMIT 200':''; return {config:this.config,configRevision:revision(this.config),evidence:this.rows("SELECT * FROM evidence ORDER BY created_at DESC LIMIT 500"),participants:this.rows("SELECT * FROM participants"+cap),turns:this.rows("SELECT * FROM turns ORDER BY started_at DESC LIMIT 500"),project:{id:this.id,root:this.root,name:this.config.name||this.root.split("/").at(-1),paused:!!this.config.paused},agents:this.listAgents(),goals:this.rows("SELECT * FROM goals ORDER BY created_at DESC"+cap),tasks:this.rows("SELECT * FROM tasks ORDER BY created_at DESC"+cap),messages:this.rows("SELECT * FROM messages ORDER BY created_at DESC LIMIT 200").map(message),approvals:this.rows("SELECT * FROM approvals WHERE status='pending' ORDER BY created_at"),notes:this.rows("SELECT * FROM notes ORDER BY created_at DESC"+cap),events:this.rows("SELECT * FROM events ORDER BY id DESC LIMIT 200").map(e=>({...e,data:parse(e.data_json,{})}))}; }
+  status(bounded=false){const cap=bounded?' LIMIT 200':''; return {config:this.config,configRevision:revision(this.config),evidence:bounded?[]:this.rows("SELECT * FROM evidence ORDER BY created_at DESC LIMIT 500"),participants:this.rows("SELECT * FROM participants"+cap),turns:bounded?[]:this.rows("SELECT * FROM turns ORDER BY started_at DESC LIMIT 500"),project:{id:this.id,root:this.root,name:this.config.name||this.root.split("/").at(-1),paused:!!this.config.paused},agents:this.listAgents(),goals:this.rows("SELECT * FROM goals ORDER BY created_at DESC"+cap),tasks:this.rows("SELECT * FROM tasks ORDER BY created_at DESC"+cap),messages:bounded?[]:this.rows("SELECT * FROM messages ORDER BY created_at DESC LIMIT 200").map(message),approvals:this.rows("SELECT * FROM approvals WHERE status='pending' ORDER BY created_at"),notes:bounded?[]:this.rows("SELECT * FROM notes ORDER BY created_at DESC"+cap),events:bounded?[]:this.rows("SELECT * FROM events ORDER BY id DESC LIMIT 200").map(e=>({...e,data:parse(e.data_json,{})}))}; }
   close(){this.db.close();}
 }
 
